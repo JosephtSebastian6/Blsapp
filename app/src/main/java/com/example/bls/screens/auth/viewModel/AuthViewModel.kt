@@ -21,9 +21,10 @@ class AuthViewModel : ViewModel() {
             try {
                 val response = authRepository.login(LoginRequest(username, password))
                 if (response.isSuccessful && response.body() != null) {
-                    val userRole = mapRole(response.body()!!.userType)
+                    val body = response.body()!!
+                    val userRole = mapRole(body.userType)
                     if (userRole != null) {
-                        _loginState.value = LoginState.Success(userRole)
+                        _loginState.value = LoginState.Success(userRole, body.accessToken)
                     } else {
                         _loginState.value = LoginState.Error("Rol de usuario desconocido")
                     }
@@ -50,6 +51,6 @@ class AuthViewModel : ViewModel() {
 sealed class LoginState {
     object Idle : LoginState()
     object Loading : LoginState()
-    data class Success(val role: UserRole) : LoginState()
+    data class Success(val role: UserRole, val token: String) : LoginState()
     data class Error(val message: String) : LoginState()
 }

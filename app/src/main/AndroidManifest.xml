@@ -34,9 +34,16 @@
             android:label="@string/app_name"
             android:theme="@style/Theme.BLS" />
 
-        <!-- Empresa Activity -->
+        <!-- Empresa Activity (Vista de Unidades) -->
         <activity
             android:name=".screens.empresa.EmpresaActivity"
+            android:exported="false"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.BLS" />
+        
+        <!-- Detalle de Unidad (Vista de Subcarpetas) -->
+        <activity
+            android:name=".screens.empresa.UnidadDetailActivity"
             android:exported="false"
             android:label="@string/app_name"
             android:theme="@style/Theme.BLS" />

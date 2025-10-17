@@ -59,13 +59,17 @@ fun LoginScreen(viewModel: AuthViewModel) {
 
     LaunchedEffect(loginState) {
         if (loginState is LoginState.Success) {
-            val role = (loginState as LoginState.Success).role
+            val successState = loginState as LoginState.Success
+            val role = successState.role
+            val token = successState.token
+
             val intent = when (role) {
                 UserRole.EMPRESA -> Intent(context, EmpresaActivity::class.java)
                 UserRole.ADMINISTRADOR -> Intent(context, AdministradorActivity::class.java)
                 UserRole.ESTUDIANTE -> Intent(context, EstudianteActivity::class.java)
                 UserRole.PROFESOR -> Intent(context, ProfesorActivity::class.java)
             }
+            intent.putExtra("AUTH_TOKEN", token)
             context.startActivity(intent)
         }
     }
