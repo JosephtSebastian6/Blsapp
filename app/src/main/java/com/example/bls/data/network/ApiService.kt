@@ -1,9 +1,6 @@
 package com.example.bls.data.network
 
-import com.example.bls.data.model.LoginRequest
-import com.example.bls.data.model.LoginResponse
-import com.example.bls.data.model.Subcarpeta
-import com.example.bls.data.model.Unidad
+import com.example.bls.data.model.*
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -19,4 +16,19 @@ interface ApiService {
         @Path("unidad_id") unidadId: Int,
         @Header("Authorization") token: String
     ): Response<List<Subcarpeta>>
+
+    @GET("auth/profesores/")
+    suspend fun getProfesores(@Header("Authorization") token: String): Response<List<Profesor>>
+
+    @GET("auth/profesores/{username}/resumen-asignaciones")
+    suspend fun getResumenAsignaciones(
+        @Path("username") username: String,
+        @Header("Authorization") token: String
+    ): Response<ProfesorResumen>
+
+    @GET("auth/clases/{profesor_username}")
+    suspend fun getClasesProfesor(
+        @Path("profesor_username") profesorUsername: String,
+        @Header("Authorization") token: String
+    ): Response<List<Clase>>
 }

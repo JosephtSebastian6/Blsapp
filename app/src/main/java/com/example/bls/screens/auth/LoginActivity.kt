@@ -25,14 +25,10 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.bls.MainScreenActivity
 import com.example.bls.R
-import com.example.bls.data.UserRole
-import com.example.bls.screens.admin.AdministradorActivity
 import com.example.bls.screens.auth.viewModel.AuthViewModel
 import com.example.bls.screens.auth.viewModel.LoginState
-import com.example.bls.screens.empresa.EmpresaActivity
-import com.example.bls.screens.estudiante.EstudianteActivity
-import com.example.bls.screens.profesor.ProfesorActivity
 import com.example.bls.ui.theme.BLSTheme
 
 class LoginActivity : ComponentActivity() {
@@ -60,16 +56,15 @@ fun LoginScreen(viewModel: AuthViewModel) {
     LaunchedEffect(loginState) {
         if (loginState is LoginState.Success) {
             val successState = loginState as LoginState.Success
-            val role = successState.role
+            val role = successState.role.name // Convertir enum a String
             val token = successState.token
 
-            val intent = when (role) {
-                UserRole.EMPRESA -> Intent(context, EmpresaActivity::class.java)
-                UserRole.ADMINISTRADOR -> Intent(context, AdministradorActivity::class.java)
-                UserRole.ESTUDIANTE -> Intent(context, EstudianteActivity::class.java)
-                UserRole.PROFESOR -> Intent(context, ProfesorActivity::class.java)
+            // Redirigir siempre a la nueva MainScreenActivity
+            val intent = Intent(context, MainScreenActivity::class.java).apply {
+                putExtra("USER_ROLE", role)
+                putExtra("AUTH_TOKEN", token)
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             }
-            intent.putExtra("AUTH_TOKEN", token)
             context.startActivity(intent)
         }
     }
@@ -83,7 +78,6 @@ fun LoginScreen(viewModel: AuthViewModel) {
     ) {
         Spacer(modifier = Modifier.height(40.dp))
 
-        // Logo usando logo.png - más pequeño
         Image(
             painter = painterResource(id = R.drawable.logo),
             contentDescription = "BLS Logo",
@@ -95,7 +89,6 @@ fun LoginScreen(viewModel: AuthViewModel) {
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Título
         Text(
             text = "Bienvenido",
             fontSize = 32.sp,
@@ -113,7 +106,6 @@ fun LoginScreen(viewModel: AuthViewModel) {
             modifier = Modifier.padding(bottom = 48.dp)
         )
 
-        // Campo de email
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
@@ -136,7 +128,6 @@ fun LoginScreen(viewModel: AuthViewModel) {
                 .padding(bottom = 16.dp)
         )
 
-        // Campo de contraseña
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
@@ -168,7 +159,6 @@ fun LoginScreen(viewModel: AuthViewModel) {
                 .padding(bottom = 32.dp)
         )
 
-        // Botón de iniciar sesión
         Button(
             onClick = { viewModel.login(email, password) },
             modifier = Modifier
@@ -185,12 +175,12 @@ fun LoginScreen(viewModel: AuthViewModel) {
                 Text(
                     text = "Iniciar Sesión",
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
                 )
             }
         }
 
-        // Texto "¿Olvidaste tu contraseña?"
         TextButton(
             onClick = { /* TODO: Navegar a recuperar contraseña */ },
             modifier = Modifier.padding(top = 16.dp)
@@ -204,7 +194,6 @@ fun LoginScreen(viewModel: AuthViewModel) {
 
         Spacer(modifier = Modifier.weight(1f))
 
-        // Texto de registro
         Row(
             modifier = Modifier.padding(bottom = 32.dp),
             verticalAlignment = Alignment.CenterVertically
