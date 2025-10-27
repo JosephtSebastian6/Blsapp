@@ -44,8 +44,8 @@ class UnidadDetailActivity : ComponentActivity() {
         val unitName = intent.getStringExtra("UNIT_NAME") ?: "Unidad"
         val token = intent.getStringExtra("AUTH_TOKEN")
 
-        if (token != null && unitId != -1) {
-            subcarpetasViewModel.loadSubcarpetas(unitId, token)
+        if (unitId != -1) {
+            subcarpetasViewModel.loadSubcarpetas(unitId)
         }
 
         setContent {
@@ -99,9 +99,7 @@ fun SubcarpetasScreen(
         CreateOrEditSubcarpetaDialog(
             onDismiss = { showCreateDialog = false },
             onConfirm = { nombre, descripcion ->
-                if (token != null) {
-                    viewModel.crearSubcarpeta(unitId, nombre, descripcion, token)
-                }
+                viewModel.crearSubcarpeta(unitId, nombre, descripcion)
                 showCreateDialog = false
             }
         )
@@ -112,9 +110,7 @@ fun SubcarpetasScreen(
             subcarpeta = subcarpeta,
             onDismiss = { showEditDialog = null },
             onConfirm = { nombre, descripcion ->
-                if (token != null) {
-                    viewModel.editarSubcarpeta(unitId, subcarpeta.id, nombre, descripcion, token)
-                }
+                viewModel.editarSubcarpeta(unitId, subcarpeta.id, nombre, descripcion)
                 showEditDialog = null
             }
         )
@@ -126,9 +122,7 @@ fun SubcarpetasScreen(
             text = "¿Estás seguro de que quieres eliminar '${subcarpeta.nombre}'?",
             onDismiss = { showDeleteDialog = null },
             onConfirm = {
-                if (token != null) {
-                    viewModel.eliminarSubcarpeta(unitId, subcarpeta.id, token)
-                }
+                viewModel.eliminarSubcarpeta(unitId, subcarpeta.id)
                 showDeleteDialog = null
             }
         )
@@ -140,9 +134,7 @@ fun SubcarpetasScreen(
             text = "¿Estás seguro de que quieres ${if (subcarpeta.habilitada) "ocultar" else "mostrar"} '${subcarpeta.nombre}'?",
             onDismiss = { showToggleDialog = null },
             onConfirm = {
-                if (token != null) {
-                    viewModel.toggleSubcarpeta(unitId, subcarpeta.id, token)
-                }
+                viewModel.toggleSubcarpeta(unitId, subcarpeta.id)
                 showToggleDialog = null
             }
         )

@@ -36,7 +36,7 @@ val sampleEstudiantesDetail = listOf(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EstudiantesScreen(navController: NavController, gestionUnidadesViewModel: GestionUnidadesViewModel, token: String?) {
+fun EstudiantesScreen(navController: NavController, gestionUnidadesViewModel: GestionUnidadesViewModel) {
     Scaffold(
         containerColor = Color(0xFFF0F2F5),
         topBar = {
@@ -83,7 +83,7 @@ fun EstudiantesScreen(navController: NavController, gestionUnidadesViewModel: Ge
                         EstudiantesDetailedHeader()
                         HorizontalDivider(color = Color(0xFFEEEEEE))
                         sampleEstudiantesDetail.forEach { estudiante ->
-                            EstudianteDetailedTableRow(estudiante, gestionUnidadesViewModel, token)
+                            EstudianteDetailedTableRow(estudiante, gestionUnidadesViewModel)
                             HorizontalDivider(color = Color(0xFFEEEEEE))
                         }
                     }
@@ -104,7 +104,7 @@ fun EstudiantesDetailedHeader() {
 }
 
 @Composable
-fun EstudianteDetailedTableRow(estudiante: EstudianteDetailRowData, viewModel: GestionUnidadesViewModel, token: String?) {
+fun EstudianteDetailedTableRow(estudiante: EstudianteDetailRowData, viewModel: GestionUnidadesViewModel) {
     var showManageUnitsDialog by remember { mutableStateOf(false) }
 
     if (showManageUnitsDialog) {
@@ -112,7 +112,6 @@ fun EstudianteDetailedTableRow(estudiante: EstudianteDetailRowData, viewModel: G
             studentName = estudiante.studentName, 
             username = estudiante.username,
             viewModel = viewModel,
-            token = token,
             onDismiss = { showManageUnitsDialog = false }
         )
     }
@@ -149,13 +148,11 @@ fun EstudianteDetailedTableRow(estudiante: EstudianteDetailRowData, viewModel: G
 }
 
 @Composable
-fun ManageUnitsDialog(studentName: String, username: String, viewModel: GestionUnidadesViewModel, token: String?, onDismiss: () -> Unit) {
+fun ManageUnitsDialog(studentName: String, username: String, viewModel: GestionUnidadesViewModel, onDismiss: () -> Unit) {
     val unidadesState by viewModel.unidadesState.collectAsState()
     
-    LaunchedEffect(key1 = token) {
-        if (token != null) {
-            viewModel.loadUnidades(token)
-        }
+    LaunchedEffect(Unit) {
+        viewModel.loadUnidades()
     }
 
     Dialog(onDismissRequest = onDismiss) {
@@ -181,9 +178,7 @@ fun ManageUnitsDialog(studentName: String, username: String, viewModel: GestionU
                         LazyColumn(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             items(state.unidades) { unit ->
                                 UnitItem(unit = unit, onToggle = {
-                                    if (token != null) {
-                                        viewModel.toggleUnitForStudent(unit.id, username, token)
-                                    }
+                                    viewModel.toggleUnitForStudent(unit.id, username)
                                 })
                             }
                         }

@@ -1,5 +1,6 @@
 package com.example.bls.screens.misprofes.viewModel
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bls.data.model.Clase
@@ -30,25 +31,26 @@ sealed class GruposState {
     data class Error(val message: String) : GruposState()
 }
 
-class MisProfesViewModel : ViewModel() {
+class MisProfesViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
 
-    private val profesorRepository = ProfesorRepository()
+    private val token: String = savedStateHandle.get<String>("AUTH_TOKEN") ?: ""
+    private val profesorRepository = ProfesorRepository(token)
     private val _profesState = MutableStateFlow<MisProfesState>(MisProfesState.Loading)
     val profesState: StateFlow<MisProfesState> = _profesState
 
     private val _gruposState = MutableStateFlow<GruposState>(GruposState.Idle)
     val gruposState: StateFlow<GruposState> = _gruposState
 
-    fun loadProfes(token: String) {
+    fun loadProfes() {
         viewModelScope.launch {
             _profesState.value = MisProfesState.Loading
             try {
-                val profesResponse = profesorRepository.getProfesores(token)
+                val profesResponse = profesorRepository.getProfesores()
                 if (profesResponse.isSuccessful && profesResponse.body() != null) {
                     val profesores = profesResponse.body()!!
                     val profesConResumen = profesores.map { profesor ->
                         async {
-                            val resumenResponse = profesorRepository.getResumenAsignaciones(profesor.username, token)
+                            val resumenResponse = profesorRepository.getResumenAsignaciones(profesor.username)
                             ProfeConResumen(profesor, if (resumenResponse.isSuccessful) resumenResponse.body() else null)
                         }
                     }.awaitAll()
@@ -62,11 +64,11 @@ class MisProfesViewModel : ViewModel() {
         }
     }
 
-    fun loadGrupos(profesorUsername: String, token: String) {
+    fun loadGrupos(profesorUsername: String) {
         viewModelScope.launch {
             _gruposState.value = GruposState.Loading
             try {
-                val response = profesorRepository.getClasesProfesor(profesorUsername, token)
+                val response = profesorRepository.getClasesProfesor(profesorUsername)
                 if (response.isSuccessful && response.body() != null) {
                     val todasLasClases = response.body()!!
                     // Filtrar para obtener solo los grupos reales

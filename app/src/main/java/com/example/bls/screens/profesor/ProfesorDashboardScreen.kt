@@ -22,13 +22,10 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.bls.R
 import com.example.bls.screens.profesor.viewModel.ProfesorDashboardViewModel
-import com.example.bls.screens.profesor.viewModel.ProfesorDashboardViewModelFactory
 
 @Composable
-fun ProfesorDashboardScreen(username: String, token: String) {
-    val viewModel: ProfesorDashboardViewModel = viewModel(
-        factory = ProfesorDashboardViewModelFactory(username, token)
-    )
+fun ProfesorDashboardScreen() {
+    val viewModel: ProfesorDashboardViewModel = viewModel()
     val uiState by viewModel.uiState.collectAsState()
 
     Row(modifier = Modifier.fillMaxSize().background(Color.White)) {
@@ -136,7 +133,8 @@ fun InfoField(label: String, value: String, onValueChange: (String) -> Unit, mod
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = Color(0xFF0D47A1),
                 unfocusedBorderColor = Color.LightGray,
-                containerColor = Color(0xFFF0F2F5)
+                focusedContainerColor = Color(0xFFF0F2F5),
+                unfocusedContainerColor = Color(0xFFF0F2F5)
             )
         )
     }

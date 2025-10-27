@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.bls.data.model.Clase
 import com.example.bls.screens.misprofes.viewModel.GruposState
 import com.example.bls.screens.misprofes.viewModel.MisProfesState
@@ -39,7 +40,7 @@ val sampleStudentsForManagement = listOf(
 )
 
 @Composable
-fun MisProfesScreen(viewModel: MisProfesViewModel, token: String?) {
+fun MisProfesScreen(viewModel: MisProfesViewModel) {
     val profesState by viewModel.profesState.collectAsState()
     var showCreateGroupDialog by remember { mutableStateOf(false) }
 
@@ -47,10 +48,8 @@ fun MisProfesScreen(viewModel: MisProfesViewModel, token: String?) {
         CreateGroupDialog(onDismiss = { showCreateGroupDialog = false })
     }
 
-    LaunchedEffect(token) {
-        if (token != null) {
-            viewModel.loadProfes(token)
-        }
+    LaunchedEffect(Unit) {
+        viewModel.loadProfes()
     }
 
     Column(
@@ -89,7 +88,7 @@ fun MisProfesScreen(viewModel: MisProfesViewModel, token: String?) {
             is MisProfesState.Success -> {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     items(state.profes) { profeConResumen ->
-                        ProfeCard(profeConResumen, viewModel, token)
+                        ProfeCard(profeConResumen, viewModel)
                     }
                 }
             }
@@ -103,7 +102,7 @@ fun MisProfesScreen(viewModel: MisProfesViewModel, token: String?) {
 }
 
 @Composable
-fun ProfeCard(profeConResumen: ProfeConResumen, viewModel: MisProfesViewModel, token: String?) {
+fun ProfeCard(profeConResumen: ProfeConResumen, viewModel: MisProfesViewModel) {
     val profe = profeConResumen.profesor
     val resumen = profeConResumen.resumen
     var isExpanded by remember { mutableStateOf(false) }
@@ -154,8 +153,8 @@ fun ProfeCard(profeConResumen: ProfeConResumen, viewModel: MisProfesViewModel, t
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                 ActionButton(if (isExpanded) "Ocultar grupos" else "Ver grupos", true) { 
                     isExpanded = !isExpanded
-                    if (isExpanded && token != null) {
-                        viewModel.loadGrupos(profe.username, token)
+                    if (isExpanded) {
+                        viewModel.loadGrupos(profe.username)
                     } else {
                         viewModel.clearGruposState()
                     }
@@ -384,6 +383,6 @@ fun ActionButton(text: String, isPrimary: Boolean, onClick: () -> Unit = {}) {
 @Composable
 fun MisProfesScreenPreview() {
     BLSTheme {
-        // MisProfesScreen() // Requires ViewModel
+        MisProfesScreen(viewModel = viewModel())
     }
 }

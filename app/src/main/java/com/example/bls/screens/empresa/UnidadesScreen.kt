@@ -39,10 +39,8 @@ fun UnidadesScreen(viewModel: UnidadesViewModel, token: String?) {
     val successMessage by viewModel.successMessage.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
 
-    LaunchedEffect(token) {
-        if (token != null) {
-            viewModel.loadUnidades(token)
-        }
+    LaunchedEffect(Unit) {
+        viewModel.loadUnidades()
     }
 
     LaunchedEffect(successMessage, errorMessage) {
@@ -60,9 +58,7 @@ fun UnidadesScreen(viewModel: UnidadesViewModel, token: String?) {
         CreateUnitDialog(
             onDismiss = { showCreateUnitDialog = false },
             onCreate = { nombre, descripcion ->
-                if (token != null) {
-                    viewModel.crearUnidad(nombre, descripcion, token)
-                }
+                viewModel.crearUnidad(nombre, descripcion)
                 showCreateUnitDialog = false
             }
         )

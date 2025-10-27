@@ -8,12 +8,9 @@ import com.example.bls.ui.theme.BLSTheme
 class ProfesorActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val username = intent.getStringExtra("USER_NAME") ?: ""
-        val token = intent.getStringExtra("AUTH_TOKEN") ?: ""
-
         setContent {
             BLSTheme {
-                ProfesorDashboardScreen(username = username, token = token)
+                ProfesorDashboardScreen()
             }
         }
     }

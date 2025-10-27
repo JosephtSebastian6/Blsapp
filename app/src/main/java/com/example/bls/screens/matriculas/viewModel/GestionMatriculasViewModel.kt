@@ -1,5 +1,6 @@
 package com.example.bls.screens.matriculas.viewModel
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bls.data.model.Matricula
@@ -14,17 +15,18 @@ sealed class MatriculasState {
     data class Error(val message: String) : MatriculasState()
 }
 
-class GestionMatriculasViewModel : ViewModel() {
+class GestionMatriculasViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
 
-    private val repository = MatriculasRepository()
+    private val token: String = savedStateHandle.get<String>("AUTH_TOKEN") ?: ""
+    private val repository = MatriculasRepository(token)
     private val _matriculasState = MutableStateFlow<MatriculasState>(MatriculasState.Loading)
     val matriculasState: StateFlow<MatriculasState> = _matriculasState
 
-    fun loadMatriculas(token: String) {
+    fun loadMatriculas() {
         viewModelScope.launch {
             _matriculasState.value = MatriculasState.Loading
             try {
-                val response = repository.getMatriculas(token)
+                val response = repository.getMatriculas()
                 if (response.isSuccessful && response.body() != null) {
                     _matriculasState.value = MatriculasState.Success(response.body()!!)
                 } else {
@@ -36,13 +38,13 @@ class GestionMatriculasViewModel : ViewModel() {
         }
     }
 
-    fun toggleMatricula(username: String, token: String) {
+    fun toggleMatricula(username: String) {
         viewModelScope.launch {
             try {
-                val response = repository.toggleMatricula(username, token)
+                val response = repository.toggleMatricula(username)
                 if (response.isSuccessful) {
                     // Recargar la lista para reflejar el cambio
-                    loadMatriculas(token)
+                    loadMatriculas()
                 } else {
                     // Opcional: podrías querer mostrar un error más específico aquí
                     _matriculasState.value = MatriculasState.Error("Error al actualizar la matrícula")

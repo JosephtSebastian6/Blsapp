@@ -1,61 +1,58 @@
 package com.example.bls.data.network
 
 import com.example.bls.data.model.*
+import com.squareup.moshi.JsonClass
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.*
 
-interface AuthApi {
-  @POST("login")
-  suspend fun login(@Body body: LoginRequest): Response<LoginResponse>
-}
-
-interface UsuarioApi {
-  @GET("usuario/{username}")
-  suspend fun getUsuario(@Path("username") username: String): Response<UsuarioResponse>
-
-  @PUT("update-perfil")
-  suspend fun updatePerfil(@Body perfil: Map<String, @JvmSuppressWildcards Any?>): Response<UsuarioResponse>
-}
-
 interface ApiService {
-    @POST("/auth/unidades/")
+    @POST("auth/login")
+    suspend fun login(@Body body: LoginRequest): Response<LoginResponse>
+
+    @GET("auth/usuario/{username}")
+    suspend fun getUsuario(@Path("username") username: String): Response<UsuarioResponse>
+
+    @PUT("auth/update-perfil")
+    suspend fun updatePerfil(@Body perfil: Map<String, @JvmSuppressWildcards Any?>): Response<UsuarioResponse>
+
+    @POST("auth/unidades/")
     suspend fun crearUnidad(
         @Header("Authorization") token: String,
         @Body unidad: UnidadCreate
     ): Response<UnidadResponse>
 
-    @GET("/auth/unidades/")
+    @GET("auth/unidades/")
     suspend fun getUnidades(@Header("Authorization") token: String): Response<List<Unidad>>
 
-    @PUT("/auth/unidades/{unidad_id}/toggle")
+    @PUT("auth/unidades/{unidad_id}/toggle")
     suspend fun toggleUnidad(
         @Path("unidad_id") unidadId: Int,
         @Header("Authorization") token: String
     ): Response<Unidad>
 
-    @PUT("/auth/estudiantes/{username}/unidades/{unidad_id}/toggle")
+    @PUT("auth/estudiantes/{username}/unidades/{unidad_id}/toggle")
     suspend fun toggleUnidadEstudiante(
         @Path("username") username: String,
         @Path("unidad_id") unidadId: Int,
         @Header("Authorization") token: String
     ): Response<ToggleResponse>
 
-    @GET("/auth/unidades/{unidad_id}/subcarpetas")
+    @GET("auth/unidades/{unidad_id}/subcarpetas")
     suspend fun getSubcarpetas(
         @Path("unidad_id") unidadId: Int,
         @Header("Authorization") token: String
     ): Response<List<Subcarpeta>>
 
-    @POST("/auth/unidades/{unidad_id}/subcarpetas")
+    @POST("auth/unidades/{unidad_id}/subcarpetas")
     suspend fun crearSubcarpeta(
         @Path("unidad_id") unidadId: Int,
         @Header("Authorization") token: String,
         @Body subcarpeta: SubcarpetaCreate
     ): Response<Subcarpeta>
 
-    @PUT("/auth/unidades/{unidad_id}/subcarpetas/{subcarpeta_id}")
+    @PUT("auth/unidades/{unidad_id}/subcarpetas/{subcarpeta_id}")
     suspend fun editarSubcarpeta(
         @Path("unidad_id") unidadId: Int,
         @Path("subcarpeta_id") subcarpetaId: Int,
@@ -63,14 +60,14 @@ interface ApiService {
         @Body subcarpeta: SubcarpetaUpdate
     ): Response<Subcarpeta>
 
-    @DELETE("/auth/unidades/{unidad_id}/subcarpetas/{subcarpeta_id}")
+    @DELETE("auth/unidades/{unidad_id}/subcarpetas/{subcarpeta_id}")
     suspend fun eliminarSubcarpeta(
         @Path("unidad_id") unidadId: Int,
         @Path("subcarpeta_id") subcarpetaId: Int,
         @Header("Authorization") token: String
     ): Response<Unit>
 
-    @PUT("/auth/unidades/{unidad_id}/subcarpetas/{subcarpeta_id}/toggle")
+    @PUT("auth/unidades/{unidad_id}/subcarpetas/{subcarpeta_id}/toggle")
     suspend fun toggleSubcarpeta(
         @Path("unidad_id") unidadId: Int,
         @Path("subcarpeta_id") subcarpetaId: Int,
@@ -78,7 +75,7 @@ interface ApiService {
     ): Response<ToggleResponse>
 
     @Multipart
-    @POST("/auth/empresa/subcarpetas/{unidad_id}/{subcarpeta_id}/upload")
+    @POST("auth/empresa/subcarpetas/{unidad_id}/{subcarpeta_id}/upload")
     suspend fun uploadEmpresaFile(
         @Path("unidad_id") unidadId: Int,
         @Path("subcarpeta_id") subcarpetaId: Int,
@@ -86,14 +83,14 @@ interface ApiService {
         @Part files: List<MultipartBody.Part>
     ): Response<UploadResponse>
 
-    @GET("/auth/empresa/subcarpetas/{unidad_id}/{subcarpeta_id}/files")
+    @GET("auth/empresa/subcarpetas/{unidad_id}/{subcarpeta_id}/files")
     suspend fun getEmpresaFiles(
         @Path("unidad_id") unidadId: Int,
         @Path("subcarpeta_id") subcarpetaId: Int,
         @Header("Authorization") token: String
     ): Response<List<ArchivoEmpresa>>
 
-    @DELETE("/auth/empresa/subcarpetas/{unidad_id}/{subcarpeta_id}/files/{archivo_id}")
+    @DELETE("auth/empresa/subcarpetas/{unidad_id}/{subcarpeta_id}/files/{archivo_id}")
     suspend fun deleteEmpresaFile(
         @Path("unidad_id") unidadId: Int,
         @Path("subcarpeta_id") subcarpetaId: Int,
@@ -101,7 +98,7 @@ interface ApiService {
         @Header("Authorization") token: String
     ): Response<Unit>
 
-    @POST("/auth/empresa/subcarpetas/{unidad_id}/{subcarpeta_id}/links")
+    @POST("auth/empresa/subcarpetas/{unidad_id}/{subcarpeta_id}/links")
     suspend fun crearLinkEmpresa(
         @Path("unidad_id") unidadId: Int,
         @Path("subcarpeta_id") subcarpetaId: Int,
@@ -109,7 +106,7 @@ interface ApiService {
         @Body link: LinkCreate
     ): Response<LinkResponse>
 
-    @GET("/auth/empresa/subcarpetas/{unidad_id}/{subcarpeta_id}/files/{archivo_id}/download")
+    @GET("auth/empresa/subcarpetas/{unidad_id}/{subcarpeta_id}/files/{archivo_id}/download")
     suspend fun downloadEmpresaFile(
         @Path("unidad_id") unidadId: Int,
         @Path("subcarpeta_id") subcarpetaId: Int,
@@ -117,43 +114,45 @@ interface ApiService {
         @Header("Authorization") token: String
     ): Response<ResponseBody>
 
-    @GET("/auth/profesores/")
+    @GET("auth/profesores/")
     suspend fun getProfesores(@Header("Authorization") token: String): Response<List<Profesor>>
 
-    @GET("/auth/profesores/{username}/resumen-asignaciones")
+    @GET("auth/profesores/{username}/resumen-asignaciones")
     suspend fun getResumenAsignaciones(
         @Path("username") username: String,
         @Header("Authorization") token: String
     ): Response<ProfesorResumen>
 
-    @GET("/auth/clases/{profesor_username}")
+    @GET("auth/clases/{profesor_username}")
     suspend fun getClasesProfesor(
         @Path("profesor_username") profesorUsername: String,
         @Header("Authorization") token: String
     ): Response<List<Clase>>
 
-    @GET("/auth/matriculas/")
+    @GET("auth/matriculas/")
     suspend fun getMatriculas(@Header("Authorization") token: String): Response<List<Matricula>>
 
-    @PUT("/auth/matriculas/{username}/toggle")
+    @PUT("auth/matriculas/{username}/toggle")
     suspend fun toggleMatricula(
         @Path("username") username: String,
         @Header("Authorization") token: String
     ): Response<Unit>
 
-    @GET("/estudiantes/me/dashboard")
+    @GET("estudiantes/me/dashboard")
     suspend fun getDashboardEstudiante(
         @Header("Authorization") token: String
     ): Response<DashboardEstudiante>
 
-    @GET("/estudiantes/me/unidades-habilitadas")
+    @GET("estudiantes/me/unidades-habilitadas")
     suspend fun getUnidadesHabilitadas(
         @Header("Authorization") token: String
     ): Response<List<Unidad>>
 }
 
+@JsonClass(generateAdapter = true)
 data class LoginRequest(val username: String, val password: String)
 
+@JsonClass(generateAdapter = true)
 data class UsuarioResponse(
   val username: String,
   val email: String?,
@@ -168,6 +167,7 @@ data class UsuarioResponse(
   val profile_image_url: String?
 )
 
+@JsonClass(generateAdapter = true)
 data class LoginResponse(
   val access_token: String,
   val token_type: String,

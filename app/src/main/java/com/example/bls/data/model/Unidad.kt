@@ -1,7 +1,9 @@
 package com.example.bls.data.model
 
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
+@JsonClass(generateAdapter = true)
 data class Unidad(
     val id: Int,
     val nombre: String,
@@ -10,6 +12,7 @@ data class Unidad(
     val habilitada: Boolean = true
 )
 
+@JsonClass(generateAdapter = true)
 data class Subcarpeta(
     val id: Int,
     @field:Json(name = "unidad_id") val unidadId: Int,

@@ -1,5 +1,6 @@
 package com.example.bls.screens.empresa.viewModel
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bls.data.model.Subcarpeta
@@ -8,9 +9,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class SubcarpetasViewModel : ViewModel() {
+class SubcarpetasViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
 
-    private val unidadRepository = UnidadRepository()
+    private val token: String = savedStateHandle.get<String>("AUTH_TOKEN") ?: ""
+    private val unidadRepository = UnidadRepository(token)
     private val _subcarpetasState = MutableStateFlow<SubcarpetasState>(SubcarpetasState.Loading)
     val subcarpetasState: StateFlow<SubcarpetasState> = _subcarpetasState
 
@@ -20,11 +22,11 @@ class SubcarpetasViewModel : ViewModel() {
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage
 
-    fun loadSubcarpetas(unidadId: Int, token: String) {
+    fun loadSubcarpetas(unidadId: Int) {
         viewModelScope.launch {
             _subcarpetasState.value = SubcarpetasState.Loading
             try {
-                val response = unidadRepository.getSubcarpetas(unidadId, token)
+                val response = unidadRepository.getSubcarpetas(unidadId)
                 if (response.isSuccessful && response.body() != null) {
                     _subcarpetasState.value = SubcarpetasState.Success(response.body()!!)
                 } else {
@@ -37,48 +39,48 @@ class SubcarpetasViewModel : ViewModel() {
         }
     }
 
-    fun crearSubcarpeta(unidadId: Int, nombre: String, descripcion: String?, token: String) {
+    fun crearSubcarpeta(unidadId: Int, nombre: String, descripcion: String?) {
         viewModelScope.launch {
-            val result = unidadRepository.crearSubcarpeta(unidadId, nombre, descripcion, token)
+            val result = unidadRepository.crearSubcarpeta(unidadId, nombre, descripcion)
             if (result.isSuccess) {
                 _successMessage.value = "Subcarpeta creada correctamente"
-                loadSubcarpetas(unidadId, token)
+                loadSubcarpetas(unidadId)
             } else {
                 _errorMessage.value = "Error creando subcarpeta: ${result.exceptionOrNull()?.message}"
             }
         }
     }
 
-    fun editarSubcarpeta(unidadId: Int, subcarpetaId: Int, nombre: String, descripcion: String?, token: String) {
+    fun editarSubcarpeta(unidadId: Int, subcarpetaId: Int, nombre: String, descripcion: String?) {
         viewModelScope.launch {
-            val result = unidadRepository.editarSubcarpeta(unidadId, subcarpetaId, nombre, descripcion, token)
+            val result = unidadRepository.editarSubcarpeta(unidadId, subcarpetaId, nombre, descripcion)
             if (result.isSuccess) {
                 _successMessage.value = "Subcarpeta actualizada correctamente"
-                loadSubcarpetas(unidadId, token)
+                loadSubcarpetas(unidadId)
             } else {
                 _errorMessage.value = "Error editando subcarpeta: ${result.exceptionOrNull()?.message}"
             }
         }
     }
 
-    fun eliminarSubcarpeta(unidadId: Int, subcarpetaId: Int, token: String) {
+    fun eliminarSubcarpeta(unidadId: Int, subcarpetaId: Int) {
         viewModelScope.launch {
-            val result = unidadRepository.eliminarSubcarpeta(unidadId, subcarpetaId, token)
+            val result = unidadRepository.eliminarSubcarpeta(unidadId, subcarpetaId)
             if (result.isSuccess) {
                 _successMessage.value = "Subcarpeta eliminada correctamente"
-                loadSubcarpetas(unidadId, token)
+                loadSubcarpetas(unidadId)
             } else {
                 _errorMessage.value = "Error eliminando subcarpeta: ${result.exceptionOrNull()?.message}"
             }
         }
     }
 
-    fun toggleSubcarpeta(unidadId: Int, subcarpetaId: Int, token: String) {
+    fun toggleSubcarpeta(unidadId: Int, subcarpetaId: Int) {
         viewModelScope.launch {
-            val result = unidadRepository.toggleSubcarpeta(unidadId, subcarpetaId, token)
+            val result = unidadRepository.toggleSubcarpeta(unidadId, subcarpetaId)
             if (result.isSuccess) {
                 _successMessage.value = "Estado de subcarpeta actualizado correctamente"
-                loadSubcarpetas(unidadId, token)
+                loadSubcarpetas(unidadId)
             } else {
                 _errorMessage.value = "Error actualizando subcarpeta: ${result.exceptionOrNull()?.message}"
             }

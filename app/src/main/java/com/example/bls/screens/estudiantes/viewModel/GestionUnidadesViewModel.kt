@@ -1,5 +1,6 @@
 package com.example.bls.screens.estudiantes.viewModel
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bls.data.model.Unidad
@@ -14,18 +15,19 @@ sealed class GestionUnidadesState {
     data class Error(val message: String) : GestionUnidadesState()
 }
 
-class GestionUnidadesViewModel : ViewModel() {
+class GestionUnidadesViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
 
-    private val repository = UnidadRepository()
+    private val token: String = savedStateHandle.get<String>("AUTH_TOKEN") ?: ""
+    private val repository = UnidadRepository(token)
 
     private val _unidadesState = MutableStateFlow<GestionUnidadesState>(GestionUnidadesState.Loading)
     val unidadesState: StateFlow<GestionUnidadesState> = _unidadesState
 
-    fun loadUnidades(token: String) {
+    fun loadUnidades() {
         viewModelScope.launch {
             _unidadesState.value = GestionUnidadesState.Loading
             try {
-                val response = repository.getUnidades(token)
+                val response = repository.getUnidades()
                 if (response.isSuccessful && response.body() != null) {
                     _unidadesState.value = GestionUnidadesState.Success(response.body()!!)
                 } else {
@@ -37,9 +39,9 @@ class GestionUnidadesViewModel : ViewModel() {
         }
     }
 
-    fun toggleUnitForStudent(unitId: Int, studentName: String, token: String) {
+    fun toggleUnitForStudent(unitId: Int, studentName: String) {
         viewModelScope.launch {
-            val result = repository.toggleUnidadEstudiante(studentName, unitId, token)
+            val result = repository.toggleUnidadEstudiante(studentName, unitId)
 
             if (result.isSuccess) {
                 val newState = result.getOrThrow()
@@ -60,13 +62,13 @@ class GestionUnidadesViewModel : ViewModel() {
         }
     }
 
-    fun toggleUnidad(unidadId: Int, token: String) {
+    fun toggleUnidad(unidadId: Int) {
         viewModelScope.launch {
             try {
-                val response = repository.toggleUnidad(unidadId, token)
+                val response = repository.toggleUnidad(unidadId)
                 if (response.isSuccessful) {
                     // Recargar la lista para reflejar el cambio
-                    loadUnidades(token)
+                    loadUnidades()
                 } else {
                     // Opcional: Manejar error específico
                 }

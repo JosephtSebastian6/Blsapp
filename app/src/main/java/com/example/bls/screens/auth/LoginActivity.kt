@@ -31,6 +31,7 @@ import com.example.bls.screens.auth.viewModel.AuthViewModel
 import com.example.bls.screens.auth.viewModel.LoginState
 import com.example.bls.screens.profesor.ProfesorActivity
 import com.example.bls.ui.theme.BLSTheme
+import kotlinx.coroutines.launch
 
 class LoginActivity : ComponentActivity() {
     private val authViewModel: AuthViewModel by viewModels()
@@ -53,167 +54,183 @@ fun LoginScreen(viewModel: AuthViewModel) {
     var isPasswordVisible by remember { mutableStateOf(false) }
     val loginState by viewModel.loginState.collectAsState()
     val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(loginState) {
-        if (loginState is LoginState.Success) {
-            val successState = loginState as LoginState.Success
-            val role = successState.role.name // Convertir enum a String
-            val token = successState.token
+        when (val state = loginState) {
+            is LoginState.Success -> {
+                val role = state.role.name // Convertir enum a String
+                val token = state.token
+                val username = state.username
 
-            val intent = if (role.equals("profesor", ignoreCase = true)) {
-                Intent(context, ProfesorActivity::class.java)
-            } else {
-                Intent(context, MainScreenActivity::class.java)
-            }.apply {
-                putExtra("USER_ROLE", role)
-                putExtra("AUTH_TOKEN", token)
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                val intent = if (role.equals("profesor", ignoreCase = true)) {
+                    Intent(context, ProfesorActivity::class.java)
+                } else {
+                    Intent(context, MainScreenActivity::class.java)
+                }.apply {
+                    putExtra("USER_ROLE", role)
+                    putExtra("AUTH_TOKEN", token)
+                    putExtra("username", username)
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                }
+                context.startActivity(intent)
             }
-            context.startActivity(intent)
+            is LoginState.Error -> {
+                scope.launch {
+                    snackbarHostState.showSnackbar(state.message)
+                }
+            }
+            else -> {}
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-            .padding(horizontal = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) {
-        Spacer(modifier = Modifier.height(40.dp))
-
-        Image(
-            painter = painterResource(id = R.drawable.logo),
-            contentDescription = "BLS Logo",
-            contentScale = ContentScale.Fit,
+        Column(
             modifier = Modifier
-                .fillMaxWidth(0.5f)
-                .aspectRatio(0.6f)
-        )
+                .fillMaxSize()
+                .background(Color.White)
+                .padding(it)
+                .padding(horizontal = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height(40.dp))
 
-        Spacer(modifier = Modifier.height(32.dp))
+            Image(
+                painter = painterResource(id = R.drawable.logo),
+                contentDescription = "BLS Logo",
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .fillMaxWidth(0.5f)
+                    .aspectRatio(0.6f)
+            )
 
-        Text(
-            text = "Bienvenido",
-            fontSize = 32.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
+            Spacer(modifier = Modifier.height(32.dp))
 
-        Text(
-            text = "Inicia sesión en tu cuenta",
-            fontSize = 16.sp,
-            color = Color.Gray,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(bottom = 48.dp)
-        )
+            Text(
+                text = "Bienvenido",
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
 
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Correo electrónico", color = Color.Gray) },
-            placeholder = { Text("tu@email.com", color = Color.LightGray) },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color(0xFF2196F3),
-                unfocusedBorderColor = Color.Gray,
-                cursorColor = Color(0xFF2196F3),
-                focusedTextColor = Color.Black,
-                unfocusedTextColor = Color.Black,
-                focusedContainerColor = Color(0xFFF8F9FA),
-                unfocusedContainerColor = Color(0xFFF8F9FA)
-            ),
-            shape = RoundedCornerShape(12.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
-        )
+            Text(
+                text = "Inicia sesión en tu cuenta",
+                fontSize = 16.sp,
+                color = Color.Gray,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(bottom = 48.dp)
+            )
 
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Contraseña", color = Color.Gray) },
-            placeholder = { Text("••••••••", color = Color.LightGray) },
-            singleLine = true,
-            visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            trailingIcon = {
-                IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Correo electrónico", color = Color.Gray) },
+                placeholder = { Text("tu@email.com", color = Color.LightGray) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFF2196F3),
+                    unfocusedBorderColor = Color.Gray,
+                    cursorColor = Color(0xFF2196F3),
+                    focusedTextColor = Color.Black,
+                    unfocusedTextColor = Color.Black,
+                    focusedContainerColor = Color(0xFFF8F9FA),
+                    unfocusedContainerColor = Color(0xFFF8F9FA)
+                ),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+            )
+
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Contraseña", color = Color.Gray) },
+                placeholder = { Text("••••••••", color = Color.LightGray) },
+                singleLine = true,
+                visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                trailingIcon = {
+                    IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
+                        Text(
+                            text = if (isPasswordVisible) "🙈" else "👁️",
+                            fontSize = 20.sp
+                        )
+                    }
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFF2196F3),
+                    unfocusedBorderColor = Color.Gray,
+                    cursorColor = Color(0xFF2196F3),
+                    focusedTextColor = Color.Black,
+                    unfocusedTextColor = Color.Black,
+                    focusedContainerColor = Color(0xFFF8F9FA),
+                    unfocusedContainerColor = Color(0xFFF8F9FA)
+                ),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 32.dp)
+            )
+
+            Button(
+                onClick = { viewModel.login(email, password) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF2196F3)
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                if (loginState is LoginState.Loading) {
+                    CircularProgressIndicator(color = Color.White)
+                } else {
                     Text(
-                        text = if (isPasswordVisible) "🙈" else "👁️",
-                        fontSize = 20.sp
+                        text = "Iniciar Sesión",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
                     )
                 }
-            },
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color(0xFF2196F3),
-                unfocusedBorderColor = Color.Gray,
-                cursorColor = Color(0xFF2196F3),
-                focusedTextColor = Color.Black,
-                unfocusedTextColor = Color.Black,
-                focusedContainerColor = Color(0xFFF8F9FA),
-                unfocusedContainerColor = Color(0xFFF8F9FA)
-            ),
-            shape = RoundedCornerShape(12.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 32.dp)
-        )
+            }
 
-        Button(
-            onClick = { viewModel.login(email, password) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF2196F3)
-            ),
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            if (loginState is LoginState.Loading) {
-                CircularProgressIndicator(color = Color.White)
-            } else {
+            TextButton(
+                onClick = { /* TODO: Navegar a recuperar contraseña */ },
+                modifier = Modifier.padding(top = 16.dp)
+            ) {
                 Text(
-                    text = "Iniciar Sesión",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    text = "¿Olvidaste tu contraseña?",
+                    color = Color(0xFF2196F3),
+                    fontSize = 14.sp
                 )
             }
-        }
 
-        TextButton(
-            onClick = { /* TODO: Navegar a recuperar contraseña */ },
-            modifier = Modifier.padding(top = 16.dp)
-        ) {
-            Text(
-                text = "¿Olvidaste tu contraseña?",
-                color = Color(0xFF2196F3),
-                fontSize = 14.sp
-            )
-        }
+            Spacer(modifier = Modifier.weight(1f))
 
-        Spacer(modifier = Modifier.weight(1f))
-
-        Row(
-            modifier = Modifier.padding(bottom = 32.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "¿No tienes cuenta? ",
-                color = Color.Gray,
-                fontSize = 14.sp
-            )
-            TextButton(onClick = { /* TODO: Navegar a registro */ }) {
+            Row(
+                modifier = Modifier.padding(bottom = 32.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
-                    text = "Regístrate",
-                    color = Color(0xFF2196F3),
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
+                    text = "¿No tienes cuenta? ",
+                    color = Color.Gray,
+                    fontSize = 14.sp
                 )
+                TextButton(onClick = { /* TODO: Navegar a registro */ }) {
+                    Text(
+                        text = "Regístrate",
+                        color = Color(0xFF2196F3),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }

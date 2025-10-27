@@ -23,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.bls.data.model.Matricula
 import com.example.bls.screens.matriculas.viewModel.GestionMatriculasViewModel
 import com.example.bls.screens.matriculas.viewModel.MatriculasState
@@ -30,14 +31,12 @@ import com.example.bls.ui.theme.BLSTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GestionMatriculasScreen(viewModel: GestionMatriculasViewModel, token: String?) {
+fun GestionMatriculasScreen(viewModel: GestionMatriculasViewModel) {
     var showDetailedView by remember { mutableStateOf(false) }
     val matriculasState by viewModel.matriculasState.collectAsState()
 
-    LaunchedEffect(token) {
-        if (token != null) {
-            viewModel.loadMatriculas(token)
-        }
+    LaunchedEffect(Unit) {
+        viewModel.loadMatriculas()
     }
 
     Scaffold(
@@ -64,7 +63,7 @@ fun GestionMatriculasScreen(viewModel: GestionMatriculasViewModel, token: String
             is MatriculasState.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
             is MatriculasState.Success -> {
                 if (showDetailedView) {
-                    DetailedMatriculasView(modifier = Modifier.padding(paddingValues), matriculas = state.matriculas, viewModel = viewModel, token = token)
+                    DetailedMatriculasView(modifier = Modifier.padding(paddingValues), matriculas = state.matriculas, viewModel = viewModel)
                 } else {
                     SimpleMatriculasView(modifier = Modifier.padding(paddingValues), matriculas = state.matriculas, onShowDetails = { showDetailedView = true })
                 }
@@ -123,7 +122,7 @@ fun SimpleMatriculasView(modifier: Modifier = Modifier, matriculas: List<Matricu
 }
 
 @Composable
-fun DetailedMatriculasView(modifier: Modifier = Modifier, matriculas: List<Matricula>, viewModel: GestionMatriculasViewModel, token: String?) {
+fun DetailedMatriculasView(modifier: Modifier = Modifier, matriculas: List<Matricula>, viewModel: GestionMatriculasViewModel) {
     Column(
         modifier = modifier.padding(horizontal = 16.dp)
     ) {
@@ -144,7 +143,7 @@ fun DetailedMatriculasView(modifier: Modifier = Modifier, matriculas: List<Matri
                     TableHeader(isDetailed = true)
                     Divider(color = Color(0x333F51B5))
                     matriculas.forEach { matricula ->
-                        DetailedTableRow(matricula, viewModel, token)
+                        DetailedTableRow(matricula, viewModel)
                         Divider(color = Color(0x333F51B5))
                     }
                 }
@@ -188,7 +187,7 @@ fun TableRow(matricula: Matricula, onMoreInfoClick: () -> Unit) {
 }
 
 @Composable
-fun DetailedTableRow(matricula: Matricula, viewModel: GestionMatriculasViewModel, token: String?) {
+fun DetailedTableRow(matricula: Matricula, viewModel: GestionMatriculasViewModel) {
     var showDialog by remember { mutableStateOf(false) }
 
     if (showDialog) {
@@ -199,9 +198,7 @@ fun DetailedTableRow(matricula: Matricula, viewModel: GestionMatriculasViewModel
             confirmButton = {
                 TextButton(
                     onClick = { 
-                        if (token != null) {
-                            viewModel.toggleMatricula(matricula.username, token)
-                        }
+                        viewModel.toggleMatricula(matricula.username)
                         showDialog = false 
                     }
                 ) {
@@ -251,6 +248,6 @@ fun StatItem(value: String, label: String) {
 @Composable
 fun GestionMatriculasScreenPreview() {
     BLSTheme {
-        GestionMatriculasScreen(viewModel = GestionMatriculasViewModel(), token = "fake_token")
+        GestionMatriculasScreen(viewModel = viewModel())
     }
 }

@@ -9,8 +9,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Assignment
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.Assignment
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,7 +24,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -81,7 +80,7 @@ fun MainScreenNavigation(
     val navItems = listOf(
         NavItem("unidades", "Unidades", Icons.Default.Home),
         NavItem("mis_profes", "Mis profes", Icons.Default.SupervisorAccount),
-        NavItem("matriculas", "Matrículas", Icons.Outlined.Assignment),
+        NavItem("matriculas", "Matrículas", Icons.AutoMirrored.Outlined.Assignment),
         NavItem("estudiantes", "Estudiantes", Icons.Default.Face),
         NavItem("perfil", "Perfil", Icons.Default.Person)
     )
@@ -133,13 +132,13 @@ fun MainScreenNavigation(
                     UnidadesScreen(viewModel = unidadesViewModel, token = token)
                 }
                 composable("mis_profes") {
-                    MisProfesScreen(viewModel = misProfesViewModel, token = token)
+                    MisProfesScreen(viewModel = misProfesViewModel)
                 }
                 composable("matriculas") {
-                    GestionMatriculasScreen(viewModel = gestionMatriculasViewModel, token = token)
+                    GestionMatriculasScreen(viewModel = gestionMatriculasViewModel)
                 }
                 composable("estudiantes") {
-                    EstudiantesScreen(navController = navController, gestionUnidadesViewModel = gestionUnidadesViewModel, token = token)
+                    EstudiantesScreen(navController = navController, gestionUnidadesViewModel = gestionUnidadesViewModel)
                 }
                 composable("perfil") {
                     Text("Pantalla de Perfil")

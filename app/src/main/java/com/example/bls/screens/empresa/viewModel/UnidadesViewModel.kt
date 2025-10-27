@@ -1,5 +1,6 @@
 package com.example.bls.screens.empresa.viewModel
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bls.data.model.Unidad
@@ -8,9 +9,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class UnidadesViewModel : ViewModel() {
+class UnidadesViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
 
-    private val unidadesRepository = UnidadRepository()
+    private val token: String = savedStateHandle.get<String>("AUTH_TOKEN") ?: ""
+    private val unidadesRepository = UnidadRepository(token)
     private val _unidadesState = MutableStateFlow<UnidadesState>(UnidadesState.Loading)
     val unidadesState: StateFlow<UnidadesState> = _unidadesState
 
@@ -20,11 +22,11 @@ class UnidadesViewModel : ViewModel() {
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage
 
-    fun loadUnidades(token: String) {
+    fun loadUnidades() {
         viewModelScope.launch {
             _unidadesState.value = UnidadesState.Loading
             try {
-                val response = unidadesRepository.getUnidades(token)
+                val response = unidadesRepository.getUnidades()
                 if (response.isSuccessful && response.body() != null) {
                     _unidadesState.value = UnidadesState.Success(response.body()!!)
                 } else {
@@ -37,12 +39,12 @@ class UnidadesViewModel : ViewModel() {
         }
     }
 
-    fun crearUnidad(nombre: String, descripcion: String?, token: String) {
+    fun crearUnidad(nombre: String, descripcion: String?) {
         viewModelScope.launch {
-            val result = unidadesRepository.crearUnidad(nombre, descripcion, token)
+            val result = unidadesRepository.crearUnidad(nombre, descripcion)
             if (result.isSuccess) {
                 _successMessage.value = "Unidad creada correctamente"
-                loadUnidades(token)
+                loadUnidades()
             } else {
                 _errorMessage.value = "Error creando unidad: ${result.exceptionOrNull()?.message}"
             }
