@@ -41,6 +41,11 @@ val sampleStudentsForManagement = listOf(
 @Composable
 fun MisProfesScreen(viewModel: MisProfesViewModel, token: String?) {
     val profesState by viewModel.profesState.collectAsState()
+    var showCreateGroupDialog by remember { mutableStateOf(false) }
+
+    if (showCreateGroupDialog) {
+        CreateGroupDialog(onDismiss = { showCreateGroupDialog = false })
+    }
 
     LaunchedEffect(token) {
         if (token != null) {
@@ -61,7 +66,7 @@ fun MisProfesScreen(viewModel: MisProfesViewModel, token: String?) {
         )
 
         Button(
-            onClick = { /* Acción de crear grupo */ },
+            onClick = { showCreateGroupDialog = true },
             shape = RoundedCornerShape(50),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC8E6C9)),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
@@ -175,6 +180,97 @@ fun ProfeCard(profeConResumen: ProfeConResumen, viewModel: MisProfesViewModel, t
                     }
                     is GruposState.Error -> Text(state.message, color = Color.Red, modifier = Modifier.padding(16.dp))
                     is GruposState.Idle -> { /* No mostrar nada */ }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CreateGroupDialog(onDismiss: () -> Unit) {
+    Dialog(onDismissRequest = onDismiss) {
+        Card(shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth()) {
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth().background(Color(0xFF3F51B5)).padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Crear grupo", color = Color.White, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                    IconButton(onClick = onDismiss) {
+                        Icon(Icons.Default.Close, contentDescription = "Cerrar", tint = Color.White)
+                    }
+                }
+
+                Column(modifier = Modifier.padding(16.dp)) {
+                    var expandedProfesor by remember { mutableStateOf(false) }
+                    var selectedProfesor by remember { mutableStateOf("Jhon profe (@sebastianl)") }
+                    ExposedDropdownMenuBox(expanded = expandedProfesor, onExpandedChange = { expandedProfesor = !expandedProfesor }) {
+                        OutlinedTextField(
+                            value = selectedProfesor,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Profesor") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedProfesor) },
+                            modifier = Modifier.menuAnchor().fillMaxWidth()
+                        )
+                        ExposedDropdownMenu(expanded = expandedProfesor, onDismissRequest = { expandedProfesor = false }) {
+                            // TODO: Add real professors
+                            DropdownMenuItem(text = { Text("Jhon profe (@sebastianl)") }, onClick = { selectedProfesor = "Jhon profe (@sebastianl)"; expandedProfesor = false })
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    var expandedUnidad by remember { mutableStateOf(false) }
+                    var selectedUnidad by remember { mutableStateOf("Unidad 1-Introducción") }
+                    ExposedDropdownMenuBox(expanded = expandedUnidad, onExpandedChange = { expandedUnidad = !expandedUnidad }) {
+                        OutlinedTextField(
+                            value = selectedUnidad,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Unidad") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedUnidad) },
+                            modifier = Modifier.menuAnchor().fillMaxWidth()
+                        )
+                        ExposedDropdownMenu(expanded = expandedUnidad, onDismissRequest = { expandedUnidad = false }) {
+                            // TODO: Add real unidades
+                            DropdownMenuItem(text = { Text("Unidad 1-Introducción") }, onClick = { selectedUnidad = "Unidad 1-Introducción"; expandedUnidad = false })
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    var onlyMyStudents by remember { mutableStateOf(false) }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(checked = onlyMyStudents, onCheckedChange = { onlyMyStudents = it })
+                        Text("Mostrar solo estudiantes de la unidad seleccionada")
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text("Selecciona estudiantes", fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // TODO: Replace with real student list
+                    val students = listOf("Sebastian Gonzales (@sebastianl)", "Sebastian Gonzales (@sebastianl)")
+                    students.forEach { studentName ->
+                        var isChecked by remember { mutableStateOf(false) }
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                            Checkbox(checked = isChecked, onCheckedChange = { isChecked = it })
+                            Text(studentName)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Button(
+                        onClick = { /* TODO: Create group logic */ },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC5CAE9))
+                    ) {
+                        Text("Crear grupo", color = Color(0xFF3F51B5))
+                    }
                 }
             }
         }

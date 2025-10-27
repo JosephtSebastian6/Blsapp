@@ -3,16 +3,22 @@ package com.example.bls.screens.empresa.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bls.data.model.Unidad
-import com.example.bls.data.repository.UnidadesRepository
+import com.example.bls.data.repository.UnidadRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class UnidadesViewModel : ViewModel() {
 
-    private val unidadesRepository = UnidadesRepository()
+    private val unidadesRepository = UnidadRepository()
     private val _unidadesState = MutableStateFlow<UnidadesState>(UnidadesState.Loading)
     val unidadesState: StateFlow<UnidadesState> = _unidadesState
+
+    private val _successMessage = MutableStateFlow<String?>(null)
+    val successMessage: StateFlow<String?> = _successMessage
+
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage
 
     fun loadUnidades(token: String) {
         viewModelScope.launch {
@@ -29,6 +35,23 @@ class UnidadesViewModel : ViewModel() {
                 _unidadesState.value = UnidadesState.Error("Error de conexión: ${t.message}")
             }
         }
+    }
+
+    fun crearUnidad(nombre: String, descripcion: String?, token: String) {
+        viewModelScope.launch {
+            val result = unidadesRepository.crearUnidad(nombre, descripcion, token)
+            if (result.isSuccess) {
+                _successMessage.value = "Unidad creada correctamente"
+                loadUnidades(token)
+            } else {
+                _errorMessage.value = "Error creando unidad: ${result.exceptionOrNull()?.message}"
+            }
+        }
+    }
+
+    fun clearMessages() {
+        _successMessage.value = null
+        _errorMessage.value = null
     }
 }
 

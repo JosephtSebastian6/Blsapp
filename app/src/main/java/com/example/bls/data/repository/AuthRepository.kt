@@ -1,15 +1,18 @@
 package com.example.bls.data.repository
 
-import com.example.bls.data.model.LoginRequest
-import com.example.bls.data.model.LoginResponse
-import com.example.bls.data.network.ApiService
-import com.example.bls.data.network.RetrofitClient
+import com.example.bls.data.network.ApiConfig
+import com.example.bls.data.network.AuthApi
+import com.example.bls.data.network.LoginRequest
+import com.example.bls.data.network.LoginResponse
 import retrofit2.Response
 
 class AuthRepository {
-    private val apiService: ApiService = RetrofitClient.instance
+
+    private val authApi: AuthApi by lazy {
+        ApiConfig.client { null }.create(AuthApi::class.java)
+    }
 
     suspend fun login(loginRequest: LoginRequest): Response<LoginResponse> {
-        return apiService.login(loginRequest)
+        return authApi.login(loginRequest)
     }
 }

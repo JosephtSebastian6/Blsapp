@@ -3,7 +3,7 @@ package com.example.bls.screens.auth.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bls.data.UserRole
-import com.example.bls.data.model.LoginRequest
+import com.example.bls.data.network.LoginRequest
 import com.example.bls.data.repository.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,9 +22,9 @@ class AuthViewModel : ViewModel() {
                 val response = authRepository.login(LoginRequest(username, password))
                 if (response.isSuccessful && response.body() != null) {
                     val body = response.body()!!
-                    val userRole = mapRole(body.userType)
+                    val userRole = mapRole(body.tipo_usuario ?: "")
                     if (userRole != null) {
-                        _loginState.value = LoginState.Success(userRole, body.accessToken)
+                        _loginState.value = LoginState.Success(userRole, body.access_token, body.usuario.username)
                     } else {
                         _loginState.value = LoginState.Error("Rol de usuario desconocido")
                     }
@@ -51,6 +51,6 @@ class AuthViewModel : ViewModel() {
 sealed class LoginState {
     object Idle : LoginState()
     object Loading : LoginState()
-    data class Success(val role: UserRole, val token: String) : LoginState()
+    data class Success(val role: UserRole, val token: String, val username: String) : LoginState()
     data class Error(val message: String) : LoginState()
 }

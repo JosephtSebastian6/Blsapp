@@ -1,34 +1,238 @@
 package com.example.bls.data.network
 
 import com.example.bls.data.model.*
+import okhttp3.MultipartBody
+import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.*
 
-interface ApiService {
-    @POST("auth/login")
-    suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
+interface AuthApi {
+  @POST("login")
+  suspend fun login(@Body body: LoginRequest): Response<LoginResponse>
+}
 
-    @GET("auth/unidades/")
+interface UsuarioApi {
+  @GET("usuario/{username}")
+  suspend fun getUsuario(@Path("username") username: String): Response<UsuarioResponse>
+
+  @PUT("update-perfil")
+  suspend fun updatePerfil(@Body perfil: Map<String, @JvmSuppressWildcards Any?>): Response<UsuarioResponse>
+}
+
+interface ApiService {
+    @POST("/auth/unidades/")
+    suspend fun crearUnidad(
+        @Header("Authorization") token: String,
+        @Body unidad: UnidadCreate
+    ): Response<UnidadResponse>
+
+    @GET("/auth/unidades/")
     suspend fun getUnidades(@Header("Authorization") token: String): Response<List<Unidad>>
 
-    @GET("auth/unidades/{unidad_id}/subcarpetas")
+    @PUT("/auth/unidades/{unidad_id}/toggle")
+    suspend fun toggleUnidad(
+        @Path("unidad_id") unidadId: Int,
+        @Header("Authorization") token: String
+    ): Response<Unidad>
+
+    @PUT("/auth/estudiantes/{username}/unidades/{unidad_id}/toggle")
+    suspend fun toggleUnidadEstudiante(
+        @Path("username") username: String,
+        @Path("unidad_id") unidadId: Int,
+        @Header("Authorization") token: String
+    ): Response<ToggleResponse>
+
+    @GET("/auth/unidades/{unidad_id}/subcarpetas")
     suspend fun getSubcarpetas(
         @Path("unidad_id") unidadId: Int,
         @Header("Authorization") token: String
     ): Response<List<Subcarpeta>>
 
-    @GET("auth/profesores/")
+    @POST("/auth/unidades/{unidad_id}/subcarpetas")
+    suspend fun crearSubcarpeta(
+        @Path("unidad_id") unidadId: Int,
+        @Header("Authorization") token: String,
+        @Body subcarpeta: SubcarpetaCreate
+    ): Response<Subcarpeta>
+
+    @PUT("/auth/unidades/{unidad_id}/subcarpetas/{subcarpeta_id}")
+    suspend fun editarSubcarpeta(
+        @Path("unidad_id") unidadId: Int,
+        @Path("subcarpeta_id") subcarpetaId: Int,
+        @Header("Authorization") token: String,
+        @Body subcarpeta: SubcarpetaUpdate
+    ): Response<Subcarpeta>
+
+    @DELETE("/auth/unidades/{unidad_id}/subcarpetas/{subcarpeta_id}")
+    suspend fun eliminarSubcarpeta(
+        @Path("unidad_id") unidadId: Int,
+        @Path("subcarpeta_id") subcarpetaId: Int,
+        @Header("Authorization") token: String
+    ): Response<Unit>
+
+    @PUT("/auth/unidades/{unidad_id}/subcarpetas/{subcarpeta_id}/toggle")
+    suspend fun toggleSubcarpeta(
+        @Path("unidad_id") unidadId: Int,
+        @Path("subcarpeta_id") subcarpetaId: Int,
+        @Header("Authorization") token: String
+    ): Response<ToggleResponse>
+
+    @Multipart
+    @POST("/auth/empresa/subcarpetas/{unidad_id}/{subcarpeta_id}/upload")
+    suspend fun uploadEmpresaFile(
+        @Path("unidad_id") unidadId: Int,
+        @Path("subcarpeta_id") subcarpetaId: Int,
+        @Header("Authorization") token: String,
+        @Part files: List<MultipartBody.Part>
+    ): Response<UploadResponse>
+
+    @GET("/auth/empresa/subcarpetas/{unidad_id}/{subcarpeta_id}/files")
+    suspend fun getEmpresaFiles(
+        @Path("unidad_id") unidadId: Int,
+        @Path("subcarpeta_id") subcarpetaId: Int,
+        @Header("Authorization") token: String
+    ): Response<List<ArchivoEmpresa>>
+
+    @DELETE("/auth/empresa/subcarpetas/{unidad_id}/{subcarpeta_id}/files/{archivo_id}")
+    suspend fun deleteEmpresaFile(
+        @Path("unidad_id") unidadId: Int,
+        @Path("subcarpeta_id") subcarpetaId: Int,
+        @Path("archivo_id") archivoId: String,
+        @Header("Authorization") token: String
+    ): Response<Unit>
+
+    @POST("/auth/empresa/subcarpetas/{unidad_id}/{subcarpeta_id}/links")
+    suspend fun crearLinkEmpresa(
+        @Path("unidad_id") unidadId: Int,
+        @Path("subcarpeta_id") subcarpetaId: Int,
+        @Header("Authorization") token: String,
+        @Body link: LinkCreate
+    ): Response<LinkResponse>
+
+    @GET("/auth/empresa/subcarpetas/{unidad_id}/{subcarpeta_id}/files/{archivo_id}/download")
+    suspend fun downloadEmpresaFile(
+        @Path("unidad_id") unidadId: Int,
+        @Path("subcarpeta_id") subcarpetaId: Int,
+        @Path("archivo_id") archivoId: String,
+        @Header("Authorization") token: String
+    ): Response<ResponseBody>
+
+    @GET("/auth/profesores/")
     suspend fun getProfesores(@Header("Authorization") token: String): Response<List<Profesor>>
 
-    @GET("auth/profesores/{username}/resumen-asignaciones")
+    @GET("/auth/profesores/{username}/resumen-asignaciones")
     suspend fun getResumenAsignaciones(
         @Path("username") username: String,
         @Header("Authorization") token: String
     ): Response<ProfesorResumen>
 
-    @GET("auth/clases/{profesor_username}")
+    @GET("/auth/clases/{profesor_username}")
     suspend fun getClasesProfesor(
         @Path("profesor_username") profesorUsername: String,
         @Header("Authorization") token: String
     ): Response<List<Clase>>
+
+    @GET("/auth/matriculas/")
+    suspend fun getMatriculas(@Header("Authorization") token: String): Response<List<Matricula>>
+
+    @PUT("/auth/matriculas/{username}/toggle")
+    suspend fun toggleMatricula(
+        @Path("username") username: String,
+        @Header("Authorization") token: String
+    ): Response<Unit>
+
+    @GET("/estudiantes/me/dashboard")
+    suspend fun getDashboardEstudiante(
+        @Header("Authorization") token: String
+    ): Response<DashboardEstudiante>
+
+    @GET("/estudiantes/me/unidades-habilitadas")
+    suspend fun getUnidadesHabilitadas(
+        @Header("Authorization") token: String
+    ): Response<List<Unidad>>
 }
+
+data class LoginRequest(val username: String, val password: String)
+
+data class UsuarioResponse(
+  val username: String,
+  val email: String?,
+  val nombres: String?,
+  val apellidos: String?,
+  val tipo_usuario: String?,
+  val numero_identificacion: String?,
+  val ciudad: String?,
+  val ano_nacimiento: String?,
+  val direccion: String?,
+  val telefono: String?,
+  val profile_image_url: String?
+)
+
+data class LoginResponse(
+  val access_token: String,
+  val token_type: String,
+  val tipo_usuario: String?,
+  val usuario: UsuarioResponse
+)
+
+data class ToggleResponse(val habilitada: Boolean)
+
+data class UnidadCreate(
+    val nombre: String,
+    val descripcion: String? = null
+)
+
+data class UnidadResponse(
+    val id: Int,
+    val nombre: String,
+    val descripcion: String?
+)
+
+data class SubcarpetaCreate(
+    val nombre: String,
+    val descripcion: String? = null,
+    val orden: Int = 0
+)
+
+data class SubcarpetaUpdate(
+    val nombre: String? = null,
+    val descripcion: String? = null,
+    val orden: Int? = null
+)
+
+data class ArchivoEmpresa(
+    val id: String,
+    val nombre_original: String,
+    val tipo: String,
+    val tamano: Long,
+    val fecha_subida: String,
+    val es_link: Boolean,
+    val url: String
+)
+
+data class LinkCreate(
+    val nombre: String,
+    val url: String
+)
+
+data class LinkResponse(
+    val message: String,
+    val link: ArchivoEmpresa,
+    val unidad_id: Int,
+    val subcarpeta_id: Int
+)
+
+data class UploadResponse(
+    val message: String,
+    val uploaded_files: List<UploadedFile>,
+    val unidad_id: Int,
+    val subcarpeta_id: Int,
+    val uploaded_by: String,
+    val upload_date: String
+)
+
+data class UploadedFile(
+    val filename: String,
+    val original_filename: String,
+    val file_size: Long
+)

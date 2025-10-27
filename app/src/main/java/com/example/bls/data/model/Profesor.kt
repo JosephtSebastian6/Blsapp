@@ -1,6 +1,6 @@
 package com.example.bls.data.model
 
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
 
 data class Profesor(
     val identificador: Int,
@@ -8,8 +8,8 @@ data class Profesor(
     val nombres: String?,
     val apellidos: String?,
     val email: String,
-    @SerializedName("tipo_usuario") val tipoUsuario: String,
-    @SerializedName("profile_image_url") val profileImageUrl: String? = null
+    @field:Json(name = "tipo_usuario") val tipoUsuario: String,
+    @field:Json(name = "profile_image_url") val profileImageUrl: String? = null
 ) {
     val displayName: String
         get() {
@@ -21,7 +21,7 @@ data class Profesor(
 }
 
 data class ProfesorResumen(
-    @SerializedName("profesor_username") val profesorUsername: String,
-    @SerializedName("grupos_creados") val gruposCreados: Int,
-    @SerializedName("estudiantes_asignados") val estudiantesAsignados: Int
+    @field:Json(name = "profesor_username") val profesorUsername: String,
+    @field:Json(name = "grupos_creados") val gruposCreados: Int,
+    @field:Json(name = "estudiantes_asignados") val estudiantesAsignados: Int
 )

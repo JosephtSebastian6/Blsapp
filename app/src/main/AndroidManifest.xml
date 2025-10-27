@@ -55,6 +55,13 @@
             android:label="@string/app_name"
             android:theme="@style/Theme.BLS" />
 
+        <!-- Detalle de Subcarpeta -->
+        <activity
+            android:name=".screens.empresa.SubcarpetaDetailActivity"
+            android:exported="false"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.BLS" />
+
         <!-- Administrador Activity -->
         <activity
             android:name=".screens.admin.AdministradorActivity"

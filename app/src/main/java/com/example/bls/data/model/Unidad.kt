@@ -1,18 +1,20 @@
 package com.example.bls.data.model
 
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
 
-// Modelo ajustado para que coincida con la respuesta real de la API
 data class Unidad(
     val id: Int,
     val nombre: String,
     val descripcion: String,
-    @SerializedName("subcarpetas_count") val subcarpetasCount: Int
+    @field:Json(name = "subcarpetas_count") val subcarpetasCount: Int,
+    val habilitada: Boolean = true
 )
 
-// La data class Subcarpeta se puede mantener para un uso futuro, no causa problemas.
 data class Subcarpeta(
     val id: Int,
+    @field:Json(name = "unidad_id") val unidadId: Int,
     val nombre: String,
-    val descripcion: String? = null
+    val descripcion: String? = null,
+    val habilitada: Boolean,
+    val orden: Int
 )

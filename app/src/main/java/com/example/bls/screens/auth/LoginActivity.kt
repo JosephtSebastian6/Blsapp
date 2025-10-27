@@ -29,6 +29,7 @@ import com.example.bls.MainScreenActivity
 import com.example.bls.R
 import com.example.bls.screens.auth.viewModel.AuthViewModel
 import com.example.bls.screens.auth.viewModel.LoginState
+import com.example.bls.screens.profesor.ProfesorActivity
 import com.example.bls.ui.theme.BLSTheme
 
 class LoginActivity : ComponentActivity() {
@@ -59,8 +60,11 @@ fun LoginScreen(viewModel: AuthViewModel) {
             val role = successState.role.name // Convertir enum a String
             val token = successState.token
 
-            // Redirigir siempre a la nueva MainScreenActivity
-            val intent = Intent(context, MainScreenActivity::class.java).apply {
+            val intent = if (role.equals("profesor", ignoreCase = true)) {
+                Intent(context, ProfesorActivity::class.java)
+            } else {
+                Intent(context, MainScreenActivity::class.java)
+            }.apply {
                 putExtra("USER_ROLE", role)
                 putExtra("AUTH_TOKEN", token)
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK

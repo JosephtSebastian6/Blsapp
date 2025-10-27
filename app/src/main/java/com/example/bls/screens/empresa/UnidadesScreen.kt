@@ -33,8 +33,11 @@ import com.example.bls.screens.empresa.viewModel.UnidadesViewModel
 @Composable
 fun UnidadesScreen(viewModel: UnidadesViewModel, token: String?) {
     var showLogoutDialog by remember { mutableStateOf(false) }
+    var showCreateUnitDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val unidadesState by viewModel.unidadesState.collectAsState()
+    val successMessage by viewModel.successMessage.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
 
     LaunchedEffect(token) {
         if (token != null) {
@@ -42,7 +45,29 @@ fun UnidadesScreen(viewModel: UnidadesViewModel, token: String?) {
         }
     }
 
-    // El Scaffold se gestionará desde MainScreenActivity
+    LaunchedEffect(successMessage, errorMessage) {
+        if (successMessage != null) {
+            // TODO: show snackbar or toast
+            viewModel.clearMessages()
+        }
+        if (errorMessage != null) {
+            // TODO: show snackbar or toast
+            viewModel.clearMessages()
+        }
+    }
+
+    if (showCreateUnitDialog) {
+        CreateUnitDialog(
+            onDismiss = { showCreateUnitDialog = false },
+            onCreate = { nombre, descripcion ->
+                if (token != null) {
+                    viewModel.crearUnidad(nombre, descripcion, token)
+                }
+                showCreateUnitDialog = false
+            }
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -50,15 +75,14 @@ fun UnidadesScreen(viewModel: UnidadesViewModel, token: String?) {
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Create Unit Button
         Button(
-            onClick = { /* Acción de crear unidad */ },
+            onClick = { showCreateUnitDialog = true },
             shape = RoundedCornerShape(50),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE8F5E9)), // Verde muy claro
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE8F5E9)),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Add, contentDescription = "Add", tint = Color(0xFF388E3C)) // Verde oscuro
+                Icon(Icons.Default.Add, contentDescription = "Add", tint = Color(0xFF388E3C))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Crear unidad", color = Color(0xFF388E3C), fontWeight = FontWeight.SemiBold)
             }
@@ -66,7 +90,6 @@ fun UnidadesScreen(viewModel: UnidadesViewModel, token: String?) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Content based on state
         when (val state = unidadesState) {
             is UnidadesState.Loading -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -118,6 +141,44 @@ fun UnidadesScreen(viewModel: UnidadesViewModel, token: String?) {
 }
 
 @Composable
+fun CreateUnitDialog(onDismiss: () -> Unit, onCreate: (String, String) -> Unit) {
+    var nombre by remember { mutableStateOf("") }
+    var descripcion by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Crear Nueva Unidad") },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = nombre,
+                    onValueChange = { nombre = it },
+                    label = { Text("Nombre") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = descripcion,
+                    onValueChange = { descripcion = it },
+                    label = { Text("Descripción") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            Button(onClick = { onCreate(nombre, descripcion) }) {
+                Text("Crear")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar")
+            }
+        }
+    )
+}
+
+@Composable
 fun UnitCard(unit: Unidad, token: String?) {
     val context = LocalContext.current
     Card(
@@ -142,7 +203,7 @@ fun UnitCard(unit: Unidad, token: String?) {
             Icon(
                 imageVector = Icons.Outlined.Folder,
                 contentDescription = "Unit Icon",
-                tint = Color(0xFF0D47A1), // Azul oscuro
+                tint = Color(0xFF0D47A1),
                 modifier = Modifier.size(36.dp)
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -150,7 +211,7 @@ fun UnitCard(unit: Unidad, token: String?) {
                 text = unit.nombre,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF0D47A1) // Azul oscuro
+                color = Color(0xFF0D47A1)
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
@@ -160,11 +221,10 @@ fun UnitCard(unit: Unidad, token: String?) {
             )
             Spacer(modifier = Modifier.height(24.dp))
             
-            // Chip de Subcarpetas
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(50))
-                    .background(Color(0xFFF5F5F5)) // Gris muy claro
+                    .background(Color(0xFFF5F5F5))
             ) {
                 Text(
                     text = "${unit.subcarpetasCount} Subcarpetas",

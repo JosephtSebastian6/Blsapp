@@ -53,13 +53,14 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.material.icons.extended)
+    implementation("androidx.compose.runtime:runtime-livedata")
 
-    // Retrofit & OkHttp
+    // Retrofit, OkHttp & Moshi
     implementation(libs.retrofit)
-    implementation(libs.converter.gson)
+    implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
+    implementation("com.squareup.moshi:moshi-kotlin:1.14.0")
     implementation(libs.okhttp)
     implementation(libs.logging.interceptor)
-    implementation(libs.guava)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
