@@ -34,6 +34,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.bls.screens.empresa.UnidadesScreen
 import com.example.bls.screens.empresa.viewModel.UnidadesViewModel
 import com.example.bls.screens.estudiantes.EstudiantesScreen
+import com.example.bls.screens.evaluaciones.EvaluacionesScreen
 import com.example.bls.screens.estudiantes.viewModel.GestionUnidadesViewModel
 import com.example.bls.screens.matriculas.GestionMatriculasScreen
 import com.example.bls.screens.matriculas.viewModel.GestionMatriculasViewModel
@@ -145,8 +146,8 @@ fun MainScreenNavigation(
     ) { 
         Scaffold(
             topBar = {
-                // La TopAppBar se oculta en la pantalla de perfil para seguir el diseño full screen solicitado
-                if (currentRoute != "perfil") {
+                // La TopAppBar se oculta en la pantalla de perfil y evaluaciones para seguir el diseño full screen solicitado
+                if (currentRoute != "perfil" && currentRoute != "evaluaciones") {
                     TopAppBar(
                         title = { Text("BLS App") },
                         navigationIcon = {
@@ -162,7 +163,7 @@ fun MainScreenNavigation(
                 navController = navController, 
                 startDestination = if (userRole.equals("estudiante", ignoreCase = true)) "perfil" else "unidades",
                 modifier = Modifier.padding(
-                    if (currentRoute == "perfil") PaddingValues(0.dp) else paddingValues
+                    if (currentRoute == "perfil" || currentRoute == "evaluaciones") PaddingValues(0.dp) else paddingValues
                 )
             ) {
                 composable("unidades") {
@@ -205,9 +206,18 @@ fun MainScreenNavigation(
                         }
                     }
                     composable("evaluaciones") {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text("Evaluaciones - Próximamente")
-                        }
+                        EvaluacionesScreen(
+                            onBackClick = {
+                                // Si el usuario quiere regresar, puedes abrir el drawer o navegar atrás
+                                scope.launch { drawerState.open() }
+                            },
+                            onVerCalificacionesClick = {
+                                // Navegar a calificaciones si existiera esa pantalla
+                            },
+                            onVerEvaluacionClick = { evaluacionId ->
+                                // Navegar al detalle de la evaluación
+                            }
+                        )
                     }
                 }
             }
