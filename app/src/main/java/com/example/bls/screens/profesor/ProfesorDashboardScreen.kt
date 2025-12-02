@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.bls.R
+import com.example.bls.data.model.UsuarioResponse
 import com.example.bls.screens.profesor.viewModel.ProfesorDashboardViewModel
 
 @Composable
@@ -63,7 +64,7 @@ fun ProfesorDashboardScreen() {
                     Spacer(modifier = Modifier.width(16.dp))
                     Column {
                         Text(user.nombres ?: "", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0D47A1))
-                        Chip(text = user.tipo_usuario ?: "")
+                        Chip(text = user.tipoUsuario ?: "")
                     }
                 }
 
@@ -91,13 +92,13 @@ fun ProfesorDashboardScreen() {
 }
 
 @Composable
-fun InfoGrid(user: com.example.bls.data.network.UsuarioResponse) {
+fun InfoGrid(user: UsuarioResponse) {
     var email by remember { mutableStateOf(user.email ?: "") }
-    var numeroIdentificacion by remember { mutableStateOf(user.numero_identificacion ?: "") }
+    var numeroIdentificacion by remember { mutableStateOf(user.numeroIdentificacion ?: "") }
     var nombres by remember { mutableStateOf(user.nombres ?: "") }
     var apellidos by remember { mutableStateOf(user.apellidos ?: "") }
     var ciudad by remember { mutableStateOf(user.ciudad ?: "") }
-    var anoNacimiento by remember { mutableStateOf(user.ano_nacimiento ?: "") }
+    var anoNacimiento by remember { mutableStateOf(user.anoNacimiento ?: "") }
     var direccion by remember { mutableStateOf(user.direccion ?: "") }
     var telefono by remember { mutableStateOf(user.telefono ?: "") }
 

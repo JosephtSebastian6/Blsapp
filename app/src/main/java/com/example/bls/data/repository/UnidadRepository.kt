@@ -11,12 +11,16 @@ class UnidadRepository(private val token: String) {
     }
 
     suspend fun getUnidades(): Response<List<Unidad>> {
-        return apiService.getUnidades("Bearer $token")
+        return apiService.getUnidades()
+    }
+
+    suspend fun getUnidadesEstudiante(): Response<List<Unidad>> {
+        return apiService.getUnidadesEstudiante()
     }
 
     suspend fun crearUnidad(nombre: String, descripcion: String?): Result<UnidadResponse> {
         return try {
-            val response = apiService.crearUnidad("Bearer $token", UnidadCreate(nombre, descripcion))
+            val response = apiService.crearUnidad(UnidadCreate(nombre, descripcion))
             if (response.isSuccessful && response.body() != null) {
                 Result.success(response.body()!!)
             } else {
@@ -28,12 +32,12 @@ class UnidadRepository(private val token: String) {
     }
 
     suspend fun getSubcarpetas(unidadId: Int): Response<List<Subcarpeta>> {
-        return apiService.getSubcarpetas(unidadId, "Bearer $token")
+        return apiService.getSubcarpetas(unidadId)
     }
 
     suspend fun crearSubcarpeta(unidadId: Int, nombre: String, descripcion: String?): Result<Subcarpeta> {
         return try {
-            val response = apiService.crearSubcarpeta(unidadId, "Bearer $token", SubcarpetaCreate(nombre, descripcion))
+            val response = apiService.crearSubcarpeta(unidadId, SubcarpetaCreate(nombre, descripcion))
             if (response.isSuccessful && response.body() != null) {
                 Result.success(response.body()!!)
             } else {
@@ -46,7 +50,7 @@ class UnidadRepository(private val token: String) {
 
     suspend fun editarSubcarpeta(unidadId: Int, subcarpetaId: Int, nombre: String, descripcion: String?): Result<Subcarpeta> {
         return try {
-            val response = apiService.editarSubcarpeta(unidadId, subcarpetaId, "Bearer $token", SubcarpetaUpdate(nombre, descripcion))
+            val response = apiService.editarSubcarpeta(unidadId, subcarpetaId, SubcarpetaUpdate(nombre, descripcion))
             if (response.isSuccessful && response.body() != null) {
                 Result.success(response.body()!!)
             } else {
@@ -59,7 +63,7 @@ class UnidadRepository(private val token: String) {
 
     suspend fun eliminarSubcarpeta(unidadId: Int, subcarpetaId: Int): Result<Unit> {
         return try {
-            val response = apiService.eliminarSubcarpeta(unidadId, subcarpetaId, "Bearer $token")
+            val response = apiService.eliminarSubcarpeta(unidadId, subcarpetaId)
             if (response.isSuccessful) {
                 Result.success(Unit)
             } else {
@@ -72,7 +76,7 @@ class UnidadRepository(private val token: String) {
 
     suspend fun toggleSubcarpeta(unidadId: Int, subcarpetaId: Int): Result<ToggleResponse> {
         return try {
-            val response = apiService.toggleSubcarpeta(unidadId, subcarpetaId, "Bearer $token")
+            val response = apiService.toggleSubcarpeta(unidadId, subcarpetaId)
             if (response.isSuccessful && response.body() != null) {
                 Result.success(response.body()!!)
             } else {
@@ -84,12 +88,12 @@ class UnidadRepository(private val token: String) {
     }
 
     suspend fun toggleUnidad(unidadId: Int): Response<Unidad> {
-        return apiService.toggleUnidad(unidadId, "Bearer $token")
+        return apiService.toggleUnidad(unidadId)
     }
 
     suspend fun toggleUnidadEstudiante(username: String, unidadId: Int): Result<Boolean> {
         return try {
-            val response = apiService.toggleUnidadEstudiante(username, unidadId, "Bearer $token")
+            val response = apiService.toggleUnidadEstudiante(username, unidadId)
             if (response.isSuccessful && response.body() != null) {
                 Result.success(response.body()!!.habilitada)
             } else {

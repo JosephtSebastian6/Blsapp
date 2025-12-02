@@ -1,7 +1,9 @@
 package com.example.bls.data.model
 
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
+@JsonClass(generateAdapter = true)
 data class Matricula(
     val identificador: Int,
     val username: String,

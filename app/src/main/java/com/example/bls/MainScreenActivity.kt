@@ -10,7 +10,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Assignment
+import androidx.compose.material.icons.automirrored.outlined.LibraryBooks
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Analytics
+import androidx.compose.material.icons.outlined.School
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.bls.screens.empresa.UnidadesScreen
 import com.example.bls.screens.empresa.viewModel.UnidadesViewModel
 import com.example.bls.screens.estudiantes.EstudiantesScreen
@@ -35,6 +39,7 @@ import com.example.bls.screens.matriculas.GestionMatriculasScreen
 import com.example.bls.screens.matriculas.viewModel.GestionMatriculasViewModel
 import com.example.bls.screens.misprofes.MisProfesScreen
 import com.example.bls.screens.misprofes.viewModel.MisProfesViewModel
+import com.example.bls.screens.profile.ProfileScreen
 import com.example.bls.ui.theme.BLSTheme
 import kotlinx.coroutines.launch
 
@@ -49,6 +54,8 @@ class MainScreenActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val token = intent.getStringExtra("AUTH_TOKEN")
+        val role = intent.getStringExtra("USER_ROLE") ?: ""
+        val username = intent.getStringExtra("username") ?: "" // Recuperar el username del Intent
 
         setContent {
             BLSTheme {
@@ -57,7 +64,9 @@ class MainScreenActivity : ComponentActivity() {
                     misProfesViewModel = misProfesViewModel, 
                     gestionMatriculasViewModel = gestionMatriculasViewModel,
                     gestionUnidadesViewModel = gestionUnidadesViewModel,
-                    token = token
+                    token = token,
+                    userRole = role,
+                    username = username // Pasar el username a la navegación
                 )
             }
         }
@@ -71,25 +80,44 @@ fun MainScreenNavigation(
     misProfesViewModel: MisProfesViewModel,
     gestionMatriculasViewModel: GestionMatriculasViewModel,
     gestionUnidadesViewModel: GestionUnidadesViewModel,
-    token: String?
+    token: String?,
+    userRole: String,
+    username: String // Nuevo parámetro
 ) {
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    
+    // Obtenemos la ruta actual observando el backStackEntry
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
-    val navItems = listOf(
-        NavItem("unidades", "Unidades", Icons.Default.Home),
-        NavItem("mis_profes", "Mis profes", Icons.Default.SupervisorAccount),
-        NavItem("matriculas", "Matrículas", Icons.AutoMirrored.Outlined.Assignment),
-        NavItem("estudiantes", "Estudiantes", Icons.Default.Face),
-        NavItem("perfil", "Perfil", Icons.Default.Person)
-    )
+    // Definir items del menú según el rol
+    val navItems = remember(userRole) {
+        if (userRole.equals("estudiante", ignoreCase = true)) {
+            listOf(
+                NavItem("perfil", "Inicio", Icons.Default.Person),
+                NavItem("unidades", "Unidades", Icons.Default.Home),
+                NavItem("mis_clases", "Mis Clases", Icons.AutoMirrored.Outlined.LibraryBooks),
+                NavItem("analisis_estudiante", "Análisis estudiante", Icons.Outlined.Analytics),
+                NavItem("evaluaciones", "Evaluaciones", Icons.Outlined.School)
+            )
+        } else {
+            listOf(
+                NavItem("unidades", "Unidades", Icons.Default.Home),
+                NavItem("mis_profes", "Mis profes", Icons.Default.SupervisorAccount),
+                NavItem("matriculas", "Matrículas", Icons.AutoMirrored.Outlined.Assignment),
+                NavItem("estudiantes", "Estudiantes", Icons.Default.Face),
+                NavItem("perfil", "Perfil", Icons.Default.Person)
+            )
+        }
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet(
-                drawerContainerColor = Color(0xFF0D47A1) // Azul oscuro de fondo
+                drawerContainerColor = Color(0xFF0D47A1)
             ) {
                 DrawerHeader()
                 Spacer(modifier = Modifier.height(16.dp))
@@ -97,7 +125,7 @@ fun MainScreenNavigation(
                     NavigationDrawerItem(
                         icon = { Icon(item.icon, contentDescription = item.label, tint = Color.White) },
                         label = { Text(item.label, color = Color.White, fontWeight = FontWeight.SemiBold) },
-                        selected = navController.currentDestination?.route == item.route,
+                        selected = currentRoute == item.route,
                         onClick = {
                             navController.navigate(item.route) {
                                 popUpTo(navController.graph.startDestinationId)
@@ -106,7 +134,7 @@ fun MainScreenNavigation(
                             scope.launch { drawerState.close() }
                         },
                         colors = NavigationDrawerItemDefaults.colors(
-                            selectedContainerColor = Color(0xFF1976D2), // Azul más claro para el seleccionado
+                            selectedContainerColor = Color(0xFF1976D2),
                             unselectedContainerColor = Color.Transparent
                         ),
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp).clip(RoundedCornerShape(50.dp))
@@ -117,31 +145,70 @@ fun MainScreenNavigation(
     ) { 
         Scaffold(
             topBar = {
-                TopAppBar(
-                    title = { Text("BLS App") },
-                    navigationIcon = {
-                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(Icons.Default.Menu, contentDescription = "Menu")
+                // La TopAppBar se oculta en la pantalla de perfil para seguir el diseño full screen solicitado
+                if (currentRoute != "perfil") {
+                    TopAppBar(
+                        title = { Text("BLS App") },
+                        navigationIcon = {
+                            IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                                Icon(Icons.Default.Menu, contentDescription = "Menu")
+                            }
                         }
-                    }
-                )
+                    )
+                }
             }
         ) { paddingValues ->
-            NavHost(navController = navController, startDestination = "unidades", modifier = Modifier.padding(paddingValues)) {
+            NavHost(
+                navController = navController, 
+                startDestination = if (userRole.equals("estudiante", ignoreCase = true)) "perfil" else "unidades",
+                modifier = Modifier.padding(
+                    if (currentRoute == "perfil") PaddingValues(0.dp) else paddingValues
+                )
+            ) {
                 composable("unidades") {
                     UnidadesScreen(viewModel = unidadesViewModel, token = token)
                 }
-                composable("mis_profes") {
-                    MisProfesScreen(viewModel = misProfesViewModel)
+                
+                // Rutas comunes o específicas de Admin/Empresa
+                if (!userRole.equals("estudiante", ignoreCase = true)) {
+                    composable("mis_profes") {
+                        MisProfesScreen(viewModel = misProfesViewModel)
+                    }
+                    composable("matriculas") {
+                        GestionMatriculasScreen(viewModel = gestionMatriculasViewModel)
+                    }
+                    composable("estudiantes") {
+                        EstudiantesScreen(navController = navController, gestionUnidadesViewModel = gestionUnidadesViewModel)
+                    }
+                    composable("perfil") {
+                        ProfileScreen(onBackClick = {
+                           scope.launch { drawerState.open() }
+                        }, username = username)
+                    }
                 }
-                composable("matriculas") {
-                    GestionMatriculasScreen(viewModel = gestionMatriculasViewModel)
-                }
-                composable("estudiantes") {
-                    EstudiantesScreen(navController = navController, gestionUnidadesViewModel = gestionUnidadesViewModel)
-                }
-                composable("perfil") {
-                    Text("Pantalla de Perfil")
+
+                // Rutas específicas de Estudiante
+                if (userRole.equals("estudiante", ignoreCase = true)) {
+                    composable("perfil") {
+                        ProfileScreen(onBackClick = {
+                           scope.launch { drawerState.open() }
+                        }, username = username)
+                    }
+                    composable("mis_clases") {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text("Mis Clases - Próximamente")
+                        }
+                    }
+                    composable("analisis_estudiante") {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text("Análisis estudiante - Próximamente")
+                        }
+                    }
+                    composable("evaluaciones") {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text("Evaluaciones - Próximamente")
+                        }
+                    }
                 }
             }
         }
@@ -163,7 +230,7 @@ fun DrawerHeader() {
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             androidx.compose.foundation.Image(
-                painter = painterResource(id = R.drawable.inicio), // Asegúrate de tener un recurso de imagen en drawable
+                painter = painterResource(id = R.drawable.inicio),
                 contentDescription = "User Avatar",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.size(64.dp).clip(CircleShape)

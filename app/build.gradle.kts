@@ -56,13 +56,18 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
     implementation("androidx.compose.runtime:runtime-livedata")
 
+    // Coil para carga de imágenes
+    implementation("io.coil-kt:coil-compose:2.4.0")
+
     // Retrofit, OkHttp & Moshi
     implementation(libs.retrofit)
     implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
     implementation("com.squareup.moshi:moshi-kotlin:1.15.0")
     kapt("com.squareup.moshi:moshi-kotlin-codegen:1.15.0")
-    implementation(libs.okhttp)
-    implementation(libs.logging.interceptor)
+    
+    // OkHttp 4.x requerido para usar funciones de extensión como .asRequestBody
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

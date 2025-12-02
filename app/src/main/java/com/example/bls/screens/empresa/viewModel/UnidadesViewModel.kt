@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 class UnidadesViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
 
     private val token: String = savedStateHandle.get<String>("AUTH_TOKEN") ?: ""
+    private val userRole: String = savedStateHandle.get<String>("USER_ROLE") ?: ""
     private val unidadesRepository = UnidadRepository(token)
     private val _unidadesState = MutableStateFlow<UnidadesState>(UnidadesState.Loading)
     val unidadesState: StateFlow<UnidadesState> = _unidadesState
@@ -26,11 +27,19 @@ class UnidadesViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
         viewModelScope.launch {
             _unidadesState.value = UnidadesState.Loading
             try {
-                val response = unidadesRepository.getUnidades()
+                // Lógica diferenciada por rol
+                val response = if (userRole.equals("estudiante", ignoreCase = true)) {
+                    unidadesRepository.getUnidadesEstudiante()
+                } else {
+                    unidadesRepository.getUnidades()
+                }
+
                 if (response.isSuccessful && response.body() != null) {
                     _unidadesState.value = UnidadesState.Success(response.body()!!)
                 } else {
                     val errorBody = response.errorBody()?.string() ?: "Sin detalles"
+                    // Si el error es 401/403 y es estudiante, ya estamos usando el endpoint correcto,
+                    // así que si falla es un error real.
                     _unidadesState.value = UnidadesState.Error("Error ${response.code()}: $errorBody")
                 }
             } catch (t: Throwable) {
@@ -40,6 +49,10 @@ class UnidadesViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
     }
 
     fun crearUnidad(nombre: String, descripcion: String?) {
+        if (userRole.equals("estudiante", ignoreCase = true)) {
+            _errorMessage.value = "Los estudiantes no pueden crear unidades"
+            return
+        }
         viewModelScope.launch {
             val result = unidadesRepository.crearUnidad(nombre, descripcion)
             if (result.isSuccess) {

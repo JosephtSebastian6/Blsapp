@@ -1,7 +1,9 @@
 package com.example.bls.data.model
 
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
+@JsonClass(generateAdapter = true)
 data class Profesor(
     val identificador: Int,
     val username: String,
@@ -20,6 +22,7 @@ data class Profesor(
     val handle: String get() = "@$username"
 }
 
+@JsonClass(generateAdapter = true)
 data class ProfesorResumen(
     @field:Json(name = "profesor_username") val profesorUsername: String,
     @field:Json(name = "grupos_creados") val gruposCreados: Int,

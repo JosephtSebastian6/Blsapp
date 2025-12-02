@@ -11,10 +11,10 @@ class MatriculasRepository(private val token: String) {
     }
 
     suspend fun getMatriculas(): Response<List<Matricula>> {
-        return apiService.getMatriculas("Bearer $token")
+        return apiService.getMatriculas()
     }
 
     suspend fun toggleMatricula(username: String): Response<Unit> {
-        return apiService.toggleMatricula(username, "Bearer $token")
+        return apiService.toggleMatricula(username)
     }
 }

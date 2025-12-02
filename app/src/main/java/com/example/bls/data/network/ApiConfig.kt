@@ -15,8 +15,9 @@ object ApiConfig {
     val auth = Interceptor { chain ->
       val req = chain.request()
       val b = req.newBuilder()
-      tokenProvider()?.let { b.addHeader("Authorization", "Bearer $it") }
-      b.addHeader("Content-Type", "application/json")
+      // Usamos header() en lugar de addHeader() para evitar duplicados si Retrofit ya añadió uno
+      tokenProvider()?.let { b.header("Authorization", "Bearer $it") }
+      // Eliminamos Content-Type forzado para permitir @Multipart y otros tipos gestionados por Retrofit
       chain.proceed(b.build())
     }
     val ok = OkHttpClient.Builder()

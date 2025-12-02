@@ -33,29 +33,3 @@ data class EstadisticasProgreso(
     @field:Json(name = "tiempo_estudio_total") val tiempoEstudioTotal: Int, // en minutos
     @field:Json(name = "racha_actual") val rachaActual: Int // días consecutivos
 )
-
-// Modelo de respuesta de usuario, similar a otros que tenemos
-data class UsuarioResponse(
-    val identificador: Int,
-    val username: String,
-    val nombres: String?,
-    val apellidos: String?,
-    val email: String,
-    @field:Json(name = "email_verified") val emailVerified: Boolean,
-    @field:Json(name = "numero_identificacion") val numeroIdentificacion: String?,
-    val ciudad: String?,
-    val rh: String?,
-    @field:Json(name = "grupo_sanguineo") val grupoSanguineo: String?,
-    @field:Json(name = "ano_nacimiento") val anoNacimiento: Int?,
-    val direccion: String?,
-    val telefono: String?,
-    @field:Json(name = "profile_image_url") val profileImageUrl: String?,
-    @field:Json(name = "tipo_usuario") val tipoUsuario: String,
-    @field:Json(name = "matricula_activa") val matriculaActiva: Boolean
-) {
-    val displayName: String
-        get() {
-            val nombreCompleto = "$nombres $apellidos".trim()
-            return if (nombreCompleto.isNotEmpty()) nombreCompleto else username
-        }
-}

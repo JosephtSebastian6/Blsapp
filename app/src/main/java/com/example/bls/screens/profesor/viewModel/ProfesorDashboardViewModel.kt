@@ -3,9 +3,9 @@ package com.example.bls.screens.profesor.viewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.bls.data.model.UsuarioResponse
 import com.example.bls.data.network.ApiConfig
 import com.example.bls.data.network.ApiService
-import com.example.bls.data.network.UsuarioResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch

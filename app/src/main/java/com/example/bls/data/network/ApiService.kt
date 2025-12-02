@@ -19,36 +19,34 @@ interface ApiService {
 
     @POST("auth/unidades/")
     suspend fun crearUnidad(
-        @Header("Authorization") token: String,
         @Body unidad: UnidadCreate
     ): Response<UnidadResponse>
 
     @GET("auth/unidades/")
-    suspend fun getUnidades(@Header("Authorization") token: String): Response<List<Unidad>>
+    suspend fun getUnidades(): Response<List<Unidad>>
+
+    @GET("auth/estudiantes/me/unidades-habilitadas")
+    suspend fun getUnidadesEstudiante(): Response<List<Unidad>>
 
     @PUT("auth/unidades/{unidad_id}/toggle")
     suspend fun toggleUnidad(
-        @Path("unidad_id") unidadId: Int,
-        @Header("Authorization") token: String
+        @Path("unidad_id") unidadId: Int
     ): Response<Unidad>
 
     @PUT("auth/estudiantes/{username}/unidades/{unidad_id}/toggle")
     suspend fun toggleUnidadEstudiante(
         @Path("username") username: String,
-        @Path("unidad_id") unidadId: Int,
-        @Header("Authorization") token: String
+        @Path("unidad_id") unidadId: Int
     ): Response<ToggleResponse>
 
     @GET("auth/unidades/{unidad_id}/subcarpetas")
     suspend fun getSubcarpetas(
-        @Path("unidad_id") unidadId: Int,
-        @Header("Authorization") token: String
+        @Path("unidad_id") unidadId: Int
     ): Response<List<Subcarpeta>>
 
     @POST("auth/unidades/{unidad_id}/subcarpetas")
     suspend fun crearSubcarpeta(
         @Path("unidad_id") unidadId: Int,
-        @Header("Authorization") token: String,
         @Body subcarpeta: SubcarpetaCreate
     ): Response<Subcarpeta>
 
@@ -56,22 +54,19 @@ interface ApiService {
     suspend fun editarSubcarpeta(
         @Path("unidad_id") unidadId: Int,
         @Path("subcarpeta_id") subcarpetaId: Int,
-        @Header("Authorization") token: String,
         @Body subcarpeta: SubcarpetaUpdate
     ): Response<Subcarpeta>
 
     @DELETE("auth/unidades/{unidad_id}/subcarpetas/{subcarpeta_id}")
     suspend fun eliminarSubcarpeta(
         @Path("unidad_id") unidadId: Int,
-        @Path("subcarpeta_id") subcarpetaId: Int,
-        @Header("Authorization") token: String
+        @Path("subcarpeta_id") subcarpetaId: Int
     ): Response<Unit>
 
     @PUT("auth/unidades/{unidad_id}/subcarpetas/{subcarpeta_id}/toggle")
     suspend fun toggleSubcarpeta(
         @Path("unidad_id") unidadId: Int,
-        @Path("subcarpeta_id") subcarpetaId: Int,
-        @Header("Authorization") token: String
+        @Path("subcarpeta_id") subcarpetaId: Int
     ): Response<ToggleResponse>
 
     @Multipart
@@ -79,30 +74,26 @@ interface ApiService {
     suspend fun uploadEmpresaFile(
         @Path("unidad_id") unidadId: Int,
         @Path("subcarpeta_id") subcarpetaId: Int,
-        @Header("Authorization") token: String,
         @Part files: List<MultipartBody.Part>
     ): Response<UploadResponse>
 
     @GET("auth/empresa/subcarpetas/{unidad_id}/{subcarpeta_id}/files")
     suspend fun getEmpresaFiles(
         @Path("unidad_id") unidadId: Int,
-        @Path("subcarpeta_id") subcarpetaId: Int,
-        @Header("Authorization") token: String
+        @Path("subcarpeta_id") subcarpetaId: Int
     ): Response<List<ArchivoEmpresa>>
 
     @DELETE("auth/empresa/subcarpetas/{unidad_id}/{subcarpeta_id}/files/{archivo_id}")
     suspend fun deleteEmpresaFile(
         @Path("unidad_id") unidadId: Int,
         @Path("subcarpeta_id") subcarpetaId: Int,
-        @Path("archivo_id") archivoId: String,
-        @Header("Authorization") token: String
+        @Path("archivo_id") archivoId: String
     ): Response<Unit>
 
     @POST("auth/empresa/subcarpetas/{unidad_id}/{subcarpeta_id}/links")
     suspend fun crearLinkEmpresa(
         @Path("unidad_id") unidadId: Int,
         @Path("subcarpeta_id") subcarpetaId: Int,
-        @Header("Authorization") token: String,
         @Body link: LinkCreate
     ): Response<LinkResponse>
 
@@ -110,62 +101,41 @@ interface ApiService {
     suspend fun downloadEmpresaFile(
         @Path("unidad_id") unidadId: Int,
         @Path("subcarpeta_id") subcarpetaId: Int,
-        @Path("archivo_id") archivoId: String,
-        @Header("Authorization") token: String
+        @Path("archivo_id") archivoId: String
     ): Response<ResponseBody>
 
     @GET("auth/profesores/")
-    suspend fun getProfesores(@Header("Authorization") token: String): Response<List<Profesor>>
+    suspend fun getProfesores(): Response<List<Profesor>>
 
     @GET("auth/profesores/{username}/resumen-asignaciones")
     suspend fun getResumenAsignaciones(
-        @Path("username") username: String,
-        @Header("Authorization") token: String
+        @Path("username") username: String
     ): Response<ProfesorResumen>
 
     @GET("auth/clases/{profesor_username}")
     suspend fun getClasesProfesor(
-        @Path("profesor_username") profesorUsername: String,
-        @Header("Authorization") token: String
+        @Path("profesor_username") profesorUsername: String
     ): Response<List<Clase>>
 
     @GET("auth/matriculas/")
-    suspend fun getMatriculas(@Header("Authorization") token: String): Response<List<Matricula>>
+    suspend fun getMatriculas(): Response<List<Matricula>>
 
     @PUT("auth/matriculas/{username}/toggle")
     suspend fun toggleMatricula(
-        @Path("username") username: String,
-        @Header("Authorization") token: String
+        @Path("username") username: String
     ): Response<Unit>
 
     @GET("estudiantes/me/dashboard")
     suspend fun getDashboardEstudiante(
-        @Header("Authorization") token: String
     ): Response<DashboardEstudiante>
 
     @GET("estudiantes/me/unidades-habilitadas")
     suspend fun getUnidadesHabilitadas(
-        @Header("Authorization") token: String
     ): Response<List<Unidad>>
 }
 
 @JsonClass(generateAdapter = true)
 data class LoginRequest(val username: String, val password: String)
-
-@JsonClass(generateAdapter = true)
-data class UsuarioResponse(
-  val username: String,
-  val email: String?,
-  val nombres: String?,
-  val apellidos: String?,
-  val tipo_usuario: String?,
-  val numero_identificacion: String?,
-  val ciudad: String?,
-  val ano_nacimiento: String?,
-  val direccion: String?,
-  val telefono: String?,
-  val profile_image_url: String?
-)
 
 @JsonClass(generateAdapter = true)
 data class LoginResponse(

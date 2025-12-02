@@ -12,10 +12,10 @@ class UnidadesRepository(private val token: String) {
     }
 
     suspend fun getUnidades(): Response<List<Unidad>> {
-        return apiService.getUnidades("Bearer $token")
+        return apiService.getUnidades()
     }
 
     suspend fun getSubcarpetas(unidadId: Int): Response<List<Subcarpeta>> {
-        return apiService.getSubcarpetas(unidadId, "Bearer $token")
+        return apiService.getSubcarpetas(unidadId)
     }
 }

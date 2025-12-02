@@ -13,14 +13,14 @@ class ProfesorRepository(private val token: String) {
     }
 
     suspend fun getProfesores(): Response<List<Profesor>> {
-        return apiService.getProfesores("Bearer $token")
+        return apiService.getProfesores()
     }
 
     suspend fun getResumenAsignaciones(username: String): Response<ProfesorResumen> {
-        return apiService.getResumenAsignaciones(username, "Bearer $token")
+        return apiService.getResumenAsignaciones(username)
     }
 
     suspend fun getClasesProfesor(profesorUsername: String): Response<List<Clase>> {
-        return apiService.getClasesProfesor(profesorUsername, "Bearer $token")
+        return apiService.getClasesProfesor(profesorUsername)
     }
 }
